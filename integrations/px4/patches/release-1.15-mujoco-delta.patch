@@ -1,0 +1,67 @@
+diff --git a/ROMFS/px4fmu_common/init.d-posix/airframes/CMakeLists.txt b/ROMFS/px4fmu_common/init.d-posix/airframes/CMakeLists.txt
+--- a/ROMFS/px4fmu_common/init.d-posix/airframes/CMakeLists.txt
++++ b/ROMFS/px4fmu_common/init.d-posix/airframes/CMakeLists.txt
+@@ -121,4 +121,5 @@ px4_add_romfs_files(
+ 	70001_gz_atmos_dual
+ 
+ 	# [22000, 22999] Reserve for custom models
++	22002_mujoco_delta
+ )
+diff --git a/ROMFS/px4fmu_common/init.d-posix/airframes/22002_mujoco_delta b/ROMFS/px4fmu_common/init.d-posix/airframes/22002_mujoco_delta
+new file mode 100644
+--- /dev/null
++++ b/ROMFS/px4fmu_common/init.d-posix/airframes/22002_mujoco_delta
+@@ -0,0 +1,41 @@
++#!/bin/sh
++
++. ${R}etc/init.d/rc.mc_defaults
++
++PX4_SIMULATOR=${PX4_SIMULATOR:=mujoco}
++PX4_SIM_MODEL=${PX4_SIM_MODEL:=mujoco_delta}
++
++param set-default CA_AIRFRAME 0
++param set-default CA_ROTOR_COUNT 4
++
++param set-default CA_ROTOR0_PX 0.18
++param set-default CA_ROTOR0_PY 0.18
++param set-default CA_ROTOR0_KM 0.05
++
++param set-default CA_ROTOR1_PX -0.18
++param set-default CA_ROTOR1_PY -0.18
++param set-default CA_ROTOR1_KM 0.05
++
++param set-default CA_ROTOR2_PX 0.18
++param set-default CA_ROTOR2_PY -0.18
++param set-default CA_ROTOR2_KM -0.05
++
++param set-default CA_ROTOR3_PX -0.18
++param set-default CA_ROTOR3_PY 0.18
++param set-default CA_ROTOR3_KM -0.05
++
++param set-default PWM_MAIN_FUNC1 101
++param set-default PWM_MAIN_FUNC2 102
++param set-default PWM_MAIN_FUNC3 103
++param set-default PWM_MAIN_FUNC4 104
++
++param set-default MPC_THR_HOVER 0.60
++param set-default EKF2_EV_CTRL 9
++param set-default EKF2_EV_DELAY 0
++param set-default EKF2_HGT_REF 0
++param set-default NAV_DLL_ACT 0
++param set-default COM_ARM_CHK_ESCS 0
++param set-default CBRK_SUPPLY_CHK 894281
++param set CAL_MAG0_ID 197388
++param set CAL_MAG0_PRIO 50
++param set CAL_MAG0_XOFF 0.01
+diff --git a/ROMFS/px4fmu_common/init.d-posix/px4-rc.mavlink b/ROMFS/px4fmu_common/init.d-posix/px4-rc.mavlink
+--- a/ROMFS/px4fmu_common/init.d-posix/px4-rc.mavlink
++++ b/ROMFS/px4fmu_common/init.d-posix/px4-rc.mavlink
+@@ -11,7 +11,7 @@ udp_onboard_gimbal_port_remote=$((13280+px4_instance))
+ udp_gcs_port_local=$((18570+px4_instance))
+ 
+ # GCS link
+-mavlink start -x -u $udp_gcs_port_local -r 4000000 -f
++mavlink start -x -u $udp_gcs_port_local -o 14550 -t 127.0.0.1 -r 4000000 -f
+ mavlink stream -r 50 -s POSITION_TARGET_LOCAL_NED -u $udp_gcs_port_local
+ mavlink stream -r 50 -s LOCAL_POSITION_NED -u $udp_gcs_port_local
+ mavlink stream -r 50 -s GLOBAL_POSITION_INT -u $udp_gcs_port_local

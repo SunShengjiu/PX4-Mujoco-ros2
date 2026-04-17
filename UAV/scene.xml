@@ -1,0 +1,26 @@
+<mujoco model="UAV_scene">
+  <include file="UAV.xml"/>
+
+  <statistic center="0 0 0.35" extent="2"/>
+
+  <visual>
+    <headlight ambient="0.25 0.25 0.25" diffuse="0.65 0.65 0.65" specular="0.2 0.2 0.2"/>
+    <rgba haze="0.15 0.2 0.25 1"/>
+    <quality shadowsize="4096"/>
+  </visual>
+
+  <asset>
+    <texture name="grid" type="2d" builtin="checker" width="512" height="512"
+      rgb1="0.24 0.28 0.32" rgb2="0.14 0.17 0.2"/>
+    <material name="ground_mat" texture="grid" texrepeat="4 4" texuniform="true" reflectance="0.2"/>
+  </asset>
+
+  <worldbody>
+    <light name="sun" directional="true" pos="0 0 4" dir="0 0 -1" diffuse="0.8 0.8 0.8" specular="0.15 0.15 0.15"/>
+    <light name="fill" pos="1.5 -1.5 2.5" dir="-1 1 -2" diffuse="0.35 0.35 0.35"/>
+    <camera name="overview" pos="1.6 -1.6 0.9" xyaxes="0.707 0.707 0 -0.235 0.235 0.943"/>
+
+    <geom name="ground" type="plane" size="5 5 0.1" material="ground_mat" condim="3"
+      contype="5" conaffinity="3"/>
+  </worldbody>
+</mujoco>

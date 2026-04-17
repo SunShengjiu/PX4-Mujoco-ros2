@@ -1,0 +1,339 @@
+﻿<mujoco model="UAV">
+  <compiler angle="degree" coordinate="local" meshdir="UAV" inertiafromgeom="auto"/>
+  <option timestep="0.002" gravity="0 0 -9.81"/>
+
+  <asset>
+    <material name="uav_mat" rgba="0.75 0.75 0.78 1" specular="0.3" shininess="0.2"/>
+    <material name="uav_prop_mat" rgba="0.08 0.08 0.08 1" specular="0.15" shininess="0.05"/>
+    <mesh name="uav_11000mah_battery_1" file="UAV - 11000mAh_battery-1.STL" scale="1 1 1"/>
+    <mesh name="uav_7nano_base_1" file="UAV - 7Nano_Base-1.STL" scale="1 1 1"/>
+    <mesh name="uav_7nano_1" file="UAV - 7NANO-1.STL" scale="1 1 1"/>
+    <mesh name="uav_cushion_pcb_1" file="UAV - Cushion_PCB-1.STL" scale="1 1 1"/>
+    <mesh name="uav_cushion_pcb_2" file="UAV - Cushion_PCB-2.STL" scale="1 1 1"/>
+    <mesh name="uav_cushion_pcb_3" file="UAV - Cushion_PCB-3.STL" scale="1 1 1"/>
+    <mesh name="uav_cushion_pcb_4" file="UAV - Cushion_PCB-4.STL" scale="1 1 1"/>
+    <mesh name="uav_d5l10alsupport_1" file="UAV - D5L10Alsupport-1.STL" scale="1 1 1"/>
+    <mesh name="uav_d5l10alsupport_10" file="UAV - D5L10Alsupport-10.STL" scale="1 1 1"/>
+    <mesh name="uav_d5l10alsupport_11" file="UAV - D5L10Alsupport-11.STL" scale="1 1 1"/>
+    <mesh name="uav_d5l10alsupport_12" file="UAV - D5L10Alsupport-12.STL" scale="1 1 1"/>
+    <mesh name="uav_d5l10alsupport_13" file="UAV - D5L10Alsupport-13.STL" scale="1 1 1"/>
+    <mesh name="uav_d5l10alsupport_14" file="UAV - D5L10Alsupport-14.STL" scale="1 1 1"/>
+    <mesh name="uav_d5l10alsupport_15" file="UAV - D5L10Alsupport-15.STL" scale="1 1 1"/>
+    <mesh name="uav_d5l10alsupport_16" file="UAV - D5L10Alsupport-16.STL" scale="1 1 1"/>
+    <mesh name="uav_d5l10alsupport_17" file="UAV - D5L10Alsupport-17.STL" scale="1 1 1"/>
+    <mesh name="uav_d5l10alsupport_18" file="UAV - D5L10Alsupport-18.STL" scale="1 1 1"/>
+    <mesh name="uav_d5l10alsupport_19" file="UAV - D5L10Alsupport-19.STL" scale="1 1 1"/>
+    <mesh name="uav_d5l10alsupport_2" file="UAV - D5L10Alsupport-2.STL" scale="1 1 1"/>
+    <mesh name="uav_d5l10alsupport_20" file="UAV - D5L10Alsupport-20.STL" scale="1 1 1"/>
+    <mesh name="uav_d5l10alsupport_21" file="UAV - D5L10Alsupport-21.STL" scale="1 1 1"/>
+    <mesh name="uav_d5l10alsupport_22" file="UAV - D5L10Alsupport-22.STL" scale="1 1 1"/>
+    <mesh name="uav_d5l10alsupport_23" file="UAV - D5L10Alsupport-23.STL" scale="1 1 1"/>
+    <mesh name="uav_d5l10alsupport_24" file="UAV - D5L10Alsupport-24.STL" scale="1 1 1"/>
+    <mesh name="uav_d5l10alsupport_25" file="UAV - D5L10Alsupport-25.STL" scale="1 1 1"/>
+    <mesh name="uav_d5l10alsupport_26" file="UAV - D5L10Alsupport-26.STL" scale="1 1 1"/>
+    <mesh name="uav_d5l10alsupport_27" file="UAV - D5L10Alsupport-27.STL" scale="1 1 1"/>
+    <mesh name="uav_d5l10alsupport_28" file="UAV - D5L10Alsupport-28.STL" scale="1 1 1"/>
+    <mesh name="uav_d5l10alsupport_29" file="UAV - D5L10Alsupport-29.STL" scale="1 1 1"/>
+    <mesh name="uav_d5l10alsupport_3" file="UAV - D5L10Alsupport-3.STL" scale="1 1 1"/>
+    <mesh name="uav_d5l10alsupport_30" file="UAV - D5L10Alsupport-30.STL" scale="1 1 1"/>
+    <mesh name="uav_d5l10alsupport_31" file="UAV - D5L10Alsupport-31.STL" scale="1 1 1"/>
+    <mesh name="uav_d5l10alsupport_32" file="UAV - D5L10Alsupport-32.STL" scale="1 1 1"/>
+    <mesh name="uav_d5l10alsupport_4" file="UAV - D5L10Alsupport-4.STL" scale="1 1 1"/>
+    <mesh name="uav_d5l10alsupport_5" file="UAV - D5L10Alsupport-5.STL" scale="1 1 1"/>
+    <mesh name="uav_d5l10alsupport_6" file="UAV - D5L10Alsupport-6.STL" scale="1 1 1"/>
+    <mesh name="uav_d5l10alsupport_7" file="UAV - D5L10Alsupport-7.STL" scale="1 1 1"/>
+    <mesh name="uav_d5l10alsupport_8" file="UAV - D5L10Alsupport-8.STL" scale="1 1 1"/>
+    <mesh name="uav_d5l10alsupport_9" file="UAV - D5L10Alsupport-9.STL" scale="1 1 1"/>
+    <mesh name="uav_d5l40alsupport_1" file="UAV - D5L40Alsupport-1.STL" scale="1 1 1"/>
+    <mesh name="uav_d5l40alsupport_2" file="UAV - D5L40Alsupport-2.STL" scale="1 1 1"/>
+    <mesh name="uav_d5l40alsupport_3" file="UAV - D5L40Alsupport-3.STL" scale="1 1 1"/>
+    <mesh name="uav_d5l40alsupport_4" file="UAV - D5L40Alsupport-4.STL" scale="1 1 1"/>
+    <mesh name="uav_d5l50alsupport_1" file="UAV - D5L50Alsupport-1.STL" scale="1 1 1"/>
+    <mesh name="uav_d5l50alsupport_2" file="UAV - D5L50Alsupport-2.STL" scale="1 1 1"/>
+    <mesh name="uav_d5l50alsupport_3" file="UAV - D5L50Alsupport-3.STL" scale="1 1 1"/>
+    <mesh name="uav_d5l50alsupport_4" file="UAV - D5L50Alsupport-4.STL" scale="1 1 1"/>
+    <mesh name="uav_motor_2807_1300kv_1" file="UAV - Motor_2807_1300KV-1.STL" scale="1 1 1"/>
+    <mesh name="uav_motor_2807_1300kv_2" file="UAV - Motor_2807_1300KV-2.STL" scale="1 1 1"/>
+    <mesh name="uav_motor_2807_1300kv_3" file="UAV - Motor_2807_1300KV-3.STL" scale="1 1 1"/>
+    <mesh name="uav_motor_2807_1300kv_4" file="UAV - Motor_2807_1300KV-4.STL" scale="1 1 1"/>
+    <mesh name="uav_n100pc_1" file="UAV - N100PC-1.STL" scale="1 1 1"/>
+    <mesh name="uav_pad_7nano_1" file="UAV - PAD_7NANO-1.STL" scale="1 1 1"/>
+    <mesh name="uav_pad_7nano_2" file="UAV - PAD_7NANO-2.STL" scale="1 1 1"/>
+    <mesh name="uav_pad_7nano_3" file="UAV - PAD_7NANO-3.STL" scale="1 1 1"/>
+    <mesh name="uav_pad_7nano_4" file="UAV - PAD_7NANO-4.STL" scale="1 1 1"/>
+    <mesh name="uav_pc_base_1" file="UAV - PC_Base-1.STL" scale="1 1 1"/>
+    <mesh name="uav_prop_1" file="UAV - prop-1.STL" scale="1 1 1"/>
+    <mesh name="uav_prop_2" file="UAV - prop-2.STL" scale="1 1 1"/>
+    <mesh name="uav_prop_3" file="UAV - prop-3.STL" scale="1 1 1"/>
+    <mesh name="uav_prop_4" file="UAV - prop-4.STL" scale="1 1 1"/>
+    <mesh name="uav_uav_lower_arm_1" file="UAV - UAV_Lower_Arm-1.STL" scale="1 1 1"/>
+    <mesh name="uav_uav_lower_arm_2" file="UAV - UAV_Lower_Arm-2.STL" scale="1 1 1"/>
+    <mesh name="uav_uav_lower_arm_3" file="UAV - UAV_Lower_Arm-3.STL" scale="1 1 1"/>
+    <mesh name="uav_uav_lower_arm_4" file="UAV - UAV_Lower_Arm-4.STL" scale="1 1 1"/>
+    <mesh name="uav_uav_lower_board_1" file="UAV - UAV_Lower_board-1.STL" scale="1 1 1"/>
+    <mesh name="uav_uav_upper_arm_1" file="UAV - UAV_Upper_Arm-1.STL" scale="1 1 1"/>
+    <mesh name="uav_uav_upper_arm_2" file="UAV - UAV_Upper_Arm-2.STL" scale="1 1 1"/>
+    <mesh name="uav_uav_upper_arm_3" file="UAV - UAV_Upper_Arm-3.STL" scale="1 1 1"/>
+    <mesh name="uav_uav_upper_arm_4" file="UAV - UAV_Upper_Arm-4.STL" scale="1 1 1"/>
+    <mesh name="uav_uav_upper_board_1" file="UAV - UAV_Upper_board-1.STL" scale="1 1 1"/>
+  </asset>
+
+  <default>
+    <!-- Finest-grained setup: one fixed child body per CAD part so MuJoCo can -->
+    <!-- expose per-part inertias in the GUI while the whole UAV still moves as -->
+    <!-- a single rigid subtree through the root freejoint. -->
+    <geom type="mesh" density="1362.6680182945286" material="uav_mat" friction="0.8 0.1 0.1"
+      solref="0.005 1" solimp="0.9 0.95 0.001"/>
+    <default class="frame">
+      <geom group="1"/>
+    </default>
+    <default class="payload">
+      <geom group="2"/>
+    </default>
+    <default class="prop">
+      <!-- Props collide with the ground, but not with the rest of the UAV. -->
+      <geom group="1" contype="2" conaffinity="4" material="uav_prop_mat"/>
+    </default>
+  </default>
+
+  <worldbody>
+    <body name="uav" pos="0 0 0.25">
+      <freejoint/>
+      <site name="imu" pos="0 0 0.02" size="0.005" rgba="0.2 0.8 1 1"/>
+      <!-- PX4 Quad X rotor order: 1=front-left, 2=back-right, 3=front-right, 4=back-left -->
+      <site name="motor_1_site" pos="0.094 0.060 0.020" size="0.006" rgba="0.2 1 0.2 1"/>
+      <site name="motor_2_site" pos="-0.094 -0.060 0.020" size="0.006" rgba="1 0.7 0.2 1"/>
+      <site name="motor_3_site" pos="0.094 -0.060 0.020" size="0.006" rgba="1 0.2 0.2 1"/>
+      <site name="motor_4_site" pos="-0.094 0.060 0.020" size="0.006" rgba="0.2 0.7 1 1"/>
+      <body name="cad_frame" euler="0 -90 0">
+        <body name="part_uav_11000mah_battery_1">
+          <geom class="payload" name="uav_11000mah_battery_1" mesh="uav_11000mah_battery_1"/>
+        </body>
+        <body name="part_uav_7nano_base_1">
+          <geom class="payload" name="uav_7nano_base_1" mesh="uav_7nano_base_1"/>
+        </body>
+        <body name="part_uav_7nano_1">
+          <geom class="payload" name="uav_7nano_1" mesh="uav_7nano_1"/>
+        </body>
+        <body name="part_uav_cushion_pcb_1">
+          <geom class="payload" name="uav_cushion_pcb_1" mesh="uav_cushion_pcb_1"/>
+        </body>
+        <body name="part_uav_cushion_pcb_2">
+          <geom class="payload" name="uav_cushion_pcb_2" mesh="uav_cushion_pcb_2"/>
+        </body>
+        <body name="part_uav_cushion_pcb_3">
+          <geom class="payload" name="uav_cushion_pcb_3" mesh="uav_cushion_pcb_3"/>
+        </body>
+        <body name="part_uav_cushion_pcb_4">
+          <geom class="payload" name="uav_cushion_pcb_4" mesh="uav_cushion_pcb_4"/>
+        </body>
+        <body name="part_uav_d5l10alsupport_1">
+          <geom class="frame" name="uav_d5l10alsupport_1" mesh="uav_d5l10alsupport_1"/>
+        </body>
+        <body name="part_uav_d5l10alsupport_10">
+          <geom class="frame" name="uav_d5l10alsupport_10" mesh="uav_d5l10alsupport_10"/>
+        </body>
+        <body name="part_uav_d5l10alsupport_11">
+          <geom class="frame" name="uav_d5l10alsupport_11" mesh="uav_d5l10alsupport_11"/>
+        </body>
+        <body name="part_uav_d5l10alsupport_12">
+          <geom class="frame" name="uav_d5l10alsupport_12" mesh="uav_d5l10alsupport_12"/>
+        </body>
+        <body name="part_uav_d5l10alsupport_13">
+          <geom class="frame" name="uav_d5l10alsupport_13" mesh="uav_d5l10alsupport_13"/>
+        </body>
+        <body name="part_uav_d5l10alsupport_14">
+          <geom class="frame" name="uav_d5l10alsupport_14" mesh="uav_d5l10alsupport_14"/>
+        </body>
+        <body name="part_uav_d5l10alsupport_15">
+          <geom class="frame" name="uav_d5l10alsupport_15" mesh="uav_d5l10alsupport_15"/>
+        </body>
+        <body name="part_uav_d5l10alsupport_16">
+          <geom class="frame" name="uav_d5l10alsupport_16" mesh="uav_d5l10alsupport_16"/>
+        </body>
+        <body name="part_uav_d5l10alsupport_17">
+          <geom class="frame" name="uav_d5l10alsupport_17" mesh="uav_d5l10alsupport_17"/>
+        </body>
+        <body name="part_uav_d5l10alsupport_18">
+          <geom class="frame" name="uav_d5l10alsupport_18" mesh="uav_d5l10alsupport_18"/>
+        </body>
+        <body name="part_uav_d5l10alsupport_19">
+          <geom class="frame" name="uav_d5l10alsupport_19" mesh="uav_d5l10alsupport_19"/>
+        </body>
+        <body name="part_uav_d5l10alsupport_2">
+          <geom class="frame" name="uav_d5l10alsupport_2" mesh="uav_d5l10alsupport_2"/>
+        </body>
+        <body name="part_uav_d5l10alsupport_20">
+          <geom class="frame" name="uav_d5l10alsupport_20" mesh="uav_d5l10alsupport_20"/>
+        </body>
+        <body name="part_uav_d5l10alsupport_21">
+          <geom class="frame" name="uav_d5l10alsupport_21" mesh="uav_d5l10alsupport_21"/>
+        </body>
+        <body name="part_uav_d5l10alsupport_22">
+          <geom class="frame" name="uav_d5l10alsupport_22" mesh="uav_d5l10alsupport_22"/>
+        </body>
+        <body name="part_uav_d5l10alsupport_23">
+          <geom class="frame" name="uav_d5l10alsupport_23" mesh="uav_d5l10alsupport_23"/>
+        </body>
+        <body name="part_uav_d5l10alsupport_24">
+          <geom class="frame" name="uav_d5l10alsupport_24" mesh="uav_d5l10alsupport_24"/>
+        </body>
+        <body name="part_uav_d5l10alsupport_25">
+          <geom class="frame" name="uav_d5l10alsupport_25" mesh="uav_d5l10alsupport_25"/>
+        </body>
+        <body name="part_uav_d5l10alsupport_26">
+          <geom class="frame" name="uav_d5l10alsupport_26" mesh="uav_d5l10alsupport_26"/>
+        </body>
+        <body name="part_uav_d5l10alsupport_27">
+          <geom class="frame" name="uav_d5l10alsupport_27" mesh="uav_d5l10alsupport_27"/>
+        </body>
+        <body name="part_uav_d5l10alsupport_28">
+          <geom class="frame" name="uav_d5l10alsupport_28" mesh="uav_d5l10alsupport_28"/>
+        </body>
+        <body name="part_uav_d5l10alsupport_29">
+          <geom class="frame" name="uav_d5l10alsupport_29" mesh="uav_d5l10alsupport_29"/>
+        </body>
+        <body name="part_uav_d5l10alsupport_3">
+          <geom class="frame" name="uav_d5l10alsupport_3" mesh="uav_d5l10alsupport_3"/>
+        </body>
+        <body name="part_uav_d5l10alsupport_30">
+          <geom class="frame" name="uav_d5l10alsupport_30" mesh="uav_d5l10alsupport_30"/>
+        </body>
+        <body name="part_uav_d5l10alsupport_31">
+          <geom class="frame" name="uav_d5l10alsupport_31" mesh="uav_d5l10alsupport_31"/>
+        </body>
+        <body name="part_uav_d5l10alsupport_32">
+          <geom class="frame" name="uav_d5l10alsupport_32" mesh="uav_d5l10alsupport_32"/>
+        </body>
+        <body name="part_uav_d5l10alsupport_4">
+          <geom class="frame" name="uav_d5l10alsupport_4" mesh="uav_d5l10alsupport_4"/>
+        </body>
+        <body name="part_uav_d5l10alsupport_5">
+          <geom class="frame" name="uav_d5l10alsupport_5" mesh="uav_d5l10alsupport_5"/>
+        </body>
+        <body name="part_uav_d5l10alsupport_6">
+          <geom class="frame" name="uav_d5l10alsupport_6" mesh="uav_d5l10alsupport_6"/>
+        </body>
+        <body name="part_uav_d5l10alsupport_7">
+          <geom class="frame" name="uav_d5l10alsupport_7" mesh="uav_d5l10alsupport_7"/>
+        </body>
+        <body name="part_uav_d5l10alsupport_8">
+          <geom class="frame" name="uav_d5l10alsupport_8" mesh="uav_d5l10alsupport_8"/>
+        </body>
+        <body name="part_uav_d5l10alsupport_9">
+          <geom class="frame" name="uav_d5l10alsupport_9" mesh="uav_d5l10alsupport_9"/>
+        </body>
+        <body name="part_uav_d5l40alsupport_1">
+          <geom class="frame" name="uav_d5l40alsupport_1" mesh="uav_d5l40alsupport_1"/>
+        </body>
+        <body name="part_uav_d5l40alsupport_2">
+          <geom class="frame" name="uav_d5l40alsupport_2" mesh="uav_d5l40alsupport_2"/>
+        </body>
+        <body name="part_uav_d5l40alsupport_3">
+          <geom class="frame" name="uav_d5l40alsupport_3" mesh="uav_d5l40alsupport_3"/>
+        </body>
+        <body name="part_uav_d5l40alsupport_4">
+          <geom class="frame" name="uav_d5l40alsupport_4" mesh="uav_d5l40alsupport_4"/>
+        </body>
+        <body name="part_uav_d5l50alsupport_1">
+          <geom class="frame" name="uav_d5l50alsupport_1" mesh="uav_d5l50alsupport_1"/>
+        </body>
+        <body name="part_uav_d5l50alsupport_2">
+          <geom class="frame" name="uav_d5l50alsupport_2" mesh="uav_d5l50alsupport_2"/>
+        </body>
+        <body name="part_uav_d5l50alsupport_3">
+          <geom class="frame" name="uav_d5l50alsupport_3" mesh="uav_d5l50alsupport_3"/>
+        </body>
+        <body name="part_uav_d5l50alsupport_4">
+          <geom class="frame" name="uav_d5l50alsupport_4" mesh="uav_d5l50alsupport_4"/>
+        </body>
+        <body name="part_uav_n100pc_1">
+          <geom class="payload" name="uav_n100pc_1" mesh="uav_n100pc_1"/>
+        </body>
+        <body name="part_uav_pad_7nano_1">
+          <geom class="payload" name="uav_pad_7nano_1" mesh="uav_pad_7nano_1"/>
+        </body>
+        <body name="part_uav_pad_7nano_2">
+          <geom class="payload" name="uav_pad_7nano_2" mesh="uav_pad_7nano_2"/>
+        </body>
+        <body name="part_uav_pad_7nano_3">
+          <geom class="payload" name="uav_pad_7nano_3" mesh="uav_pad_7nano_3"/>
+        </body>
+        <body name="part_uav_pad_7nano_4">
+          <geom class="payload" name="uav_pad_7nano_4" mesh="uav_pad_7nano_4"/>
+        </body>
+        <body name="part_uav_pc_base_1">
+          <geom class="payload" name="uav_pc_base_1" mesh="uav_pc_base_1"/>
+        </body>
+        <body name="part_uav_uav_lower_arm_1">
+          <geom class="frame" name="uav_uav_lower_arm_1" mesh="uav_uav_lower_arm_1"/>
+        </body>
+        <body name="part_uav_uav_lower_arm_2">
+          <geom class="frame" name="uav_uav_lower_arm_2" mesh="uav_uav_lower_arm_2"/>
+        </body>
+        <body name="part_uav_uav_lower_arm_3">
+          <geom class="frame" name="uav_uav_lower_arm_3" mesh="uav_uav_lower_arm_3"/>
+        </body>
+        <body name="part_uav_uav_lower_arm_4">
+          <geom class="frame" name="uav_uav_lower_arm_4" mesh="uav_uav_lower_arm_4"/>
+        </body>
+        <body name="part_uav_uav_lower_board_1">
+          <geom class="frame" name="uav_uav_lower_board_1" mesh="uav_uav_lower_board_1"/>
+        </body>
+        <body name="part_uav_uav_upper_arm_1">
+          <geom class="frame" name="uav_uav_upper_arm_1" mesh="uav_uav_upper_arm_1"/>
+        </body>
+        <body name="part_uav_uav_upper_arm_2">
+          <geom class="frame" name="uav_uav_upper_arm_2" mesh="uav_uav_upper_arm_2"/>
+        </body>
+        <body name="part_uav_uav_upper_arm_3">
+          <geom class="frame" name="uav_uav_upper_arm_3" mesh="uav_uav_upper_arm_3"/>
+        </body>
+        <body name="part_uav_uav_upper_arm_4">
+          <geom class="frame" name="uav_uav_upper_arm_4" mesh="uav_uav_upper_arm_4"/>
+        </body>
+        <body name="part_uav_uav_upper_board_1">
+          <geom class="frame" name="uav_uav_upper_board_1" mesh="uav_uav_upper_board_1"/>
+        </body>
+      </body>
+      <body name="px4_rotor_1_front_left" pos="0.094 0.060 0.020" euler="0 -90 0">
+        <geom class="frame" name="uav_motor_2807_1300kv_1" mesh="uav_motor_2807_1300kv_1"/>
+        <geom class="prop" name="uav_prop_1" mesh="uav_prop_1"/>
+      </body>
+      <body name="px4_rotor_2_back_right" pos="-0.094 -0.060 0.020" euler="0 -90 0">
+        <geom class="frame" name="uav_motor_2807_1300kv_2" mesh="uav_motor_2807_1300kv_2"/>
+        <geom class="prop" name="uav_prop_2" mesh="uav_prop_2"/>
+      </body>
+      <body name="px4_rotor_3_front_right" pos="0.094 -0.060 0.020" euler="0 -90 0">
+        <geom class="frame" name="uav_motor_2807_1300kv_3" mesh="uav_motor_2807_1300kv_3"/>
+        <geom class="prop" name="uav_prop_3" mesh="uav_prop_3"/>
+      </body>
+      <body name="px4_rotor_4_back_left" pos="-0.094 0.060 0.020" euler="0 -90 0">
+        <geom class="frame" name="uav_motor_2807_1300kv_4" mesh="uav_motor_2807_1300kv_4"/>
+        <geom class="prop" name="uav_prop_4" mesh="uav_prop_4"/>
+      </body>
+    </body>
+  </worldbody>
+
+  <sensor>
+    <gyro name="body_gyro" site="imu"/>
+    <accelerometer name="body_linacc" site="imu"/>
+    <magnetometer name="body_mag" site="imu"/>
+    <framequat name="body_quat" objtype="site" objname="imu"/>
+    <framelinvel name="body_linvel" objtype="site" objname="imu"/>
+    <framelinacc name="body_frameacc" objtype="site" objname="imu"/>
+  </sensor>
+
+  <actuator>
+    <motor name="motor_1" site="motor_1_site" gear="0 0 1 0 0 0.05" ctrlrange="0 12" ctrllimited="true"/>
+    <motor name="motor_2" site="motor_2_site" gear="0 0 1 0 0 0.05" ctrlrange="0 12" ctrllimited="true"/>
+    <motor name="motor_3" site="motor_3_site" gear="0 0 1 0 0 -0.05" ctrlrange="0 12" ctrllimited="true"/>
+    <motor name="motor_4" site="motor_4_site" gear="0 0 1 0 0 -0.05" ctrlrange="0 12" ctrllimited="true"/>
+  </actuator>
+
+  <keyframe>
+    <key name="hover" qpos="0 0 0.25 1 0 0 0" ctrl="4.12 4.12 4.12 4.12"/>
+  </keyframe>
+</mujoco>
+
+

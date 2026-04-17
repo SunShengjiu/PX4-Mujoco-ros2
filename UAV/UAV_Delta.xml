@@ -1,0 +1,470 @@
+<mujoco model="UAV_Delta">
+  <compiler angle="radian" coordinate="local" inertiafromgeom="auto" />
+  <option timestep="0.001" gravity="0 0 -9.81" />
+  <asset>
+    <material name="uav_mat" rgba="0.75 0.75 0.78 1" specular="0.3" shininess="0.2" />
+    <material name="uav_prop_mat" rgba="0.08 0.08 0.08 1" specular="0.15" shininess="0.05" />
+    <mesh name="uav_11000mah_battery_1" file="UAV/UAV - 11000mAh_battery-1.STL" scale="1 1 1" />
+    <mesh name="uav_7nano_base_1" file="UAV/UAV - 7Nano_Base-1.STL" scale="1 1 1" />
+    <mesh name="uav_7nano_1" file="UAV/UAV - 7NANO-1.STL" scale="1 1 1" />
+    <mesh name="uav_cushion_pcb_1" file="UAV/UAV - Cushion_PCB-1.STL" scale="1 1 1" />
+    <mesh name="uav_cushion_pcb_2" file="UAV/UAV - Cushion_PCB-2.STL" scale="1 1 1" />
+    <mesh name="uav_cushion_pcb_3" file="UAV/UAV - Cushion_PCB-3.STL" scale="1 1 1" />
+    <mesh name="uav_cushion_pcb_4" file="UAV/UAV - Cushion_PCB-4.STL" scale="1 1 1" />
+    <mesh name="uav_d5l10alsupport_1" file="UAV/UAV - D5L10Alsupport-1.STL" scale="1 1 1" />
+    <mesh name="uav_d5l10alsupport_10" file="UAV/UAV - D5L10Alsupport-10.STL" scale="1 1 1" />
+    <mesh name="uav_d5l10alsupport_11" file="UAV/UAV - D5L10Alsupport-11.STL" scale="1 1 1" />
+    <mesh name="uav_d5l10alsupport_12" file="UAV/UAV - D5L10Alsupport-12.STL" scale="1 1 1" />
+    <mesh name="uav_d5l10alsupport_13" file="UAV/UAV - D5L10Alsupport-13.STL" scale="1 1 1" />
+    <mesh name="uav_d5l10alsupport_14" file="UAV/UAV - D5L10Alsupport-14.STL" scale="1 1 1" />
+    <mesh name="uav_d5l10alsupport_15" file="UAV/UAV - D5L10Alsupport-15.STL" scale="1 1 1" />
+    <mesh name="uav_d5l10alsupport_16" file="UAV/UAV - D5L10Alsupport-16.STL" scale="1 1 1" />
+    <mesh name="uav_d5l10alsupport_17" file="UAV/UAV - D5L10Alsupport-17.STL" scale="1 1 1" />
+    <mesh name="uav_d5l10alsupport_18" file="UAV/UAV - D5L10Alsupport-18.STL" scale="1 1 1" />
+    <mesh name="uav_d5l10alsupport_19" file="UAV/UAV - D5L10Alsupport-19.STL" scale="1 1 1" />
+    <mesh name="uav_d5l10alsupport_2" file="UAV/UAV - D5L10Alsupport-2.STL" scale="1 1 1" />
+    <mesh name="uav_d5l10alsupport_20" file="UAV/UAV - D5L10Alsupport-20.STL" scale="1 1 1" />
+    <mesh name="uav_d5l10alsupport_21" file="UAV/UAV - D5L10Alsupport-21.STL" scale="1 1 1" />
+    <mesh name="uav_d5l10alsupport_22" file="UAV/UAV - D5L10Alsupport-22.STL" scale="1 1 1" />
+    <mesh name="uav_d5l10alsupport_23" file="UAV/UAV - D5L10Alsupport-23.STL" scale="1 1 1" />
+    <mesh name="uav_d5l10alsupport_24" file="UAV/UAV - D5L10Alsupport-24.STL" scale="1 1 1" />
+    <mesh name="uav_d5l10alsupport_25" file="UAV/UAV - D5L10Alsupport-25.STL" scale="1 1 1" />
+    <mesh name="uav_d5l10alsupport_26" file="UAV/UAV - D5L10Alsupport-26.STL" scale="1 1 1" />
+    <mesh name="uav_d5l10alsupport_27" file="UAV/UAV - D5L10Alsupport-27.STL" scale="1 1 1" />
+    <mesh name="uav_d5l10alsupport_28" file="UAV/UAV - D5L10Alsupport-28.STL" scale="1 1 1" />
+    <mesh name="uav_d5l10alsupport_29" file="UAV/UAV - D5L10Alsupport-29.STL" scale="1 1 1" />
+    <mesh name="uav_d5l10alsupport_3" file="UAV/UAV - D5L10Alsupport-3.STL" scale="1 1 1" />
+    <mesh name="uav_d5l10alsupport_30" file="UAV/UAV - D5L10Alsupport-30.STL" scale="1 1 1" />
+    <mesh name="uav_d5l10alsupport_31" file="UAV/UAV - D5L10Alsupport-31.STL" scale="1 1 1" />
+    <mesh name="uav_d5l10alsupport_32" file="UAV/UAV - D5L10Alsupport-32.STL" scale="1 1 1" />
+    <mesh name="uav_d5l10alsupport_4" file="UAV/UAV - D5L10Alsupport-4.STL" scale="1 1 1" />
+    <mesh name="uav_d5l10alsupport_5" file="UAV/UAV - D5L10Alsupport-5.STL" scale="1 1 1" />
+    <mesh name="uav_d5l10alsupport_6" file="UAV/UAV - D5L10Alsupport-6.STL" scale="1 1 1" />
+    <mesh name="uav_d5l10alsupport_7" file="UAV/UAV - D5L10Alsupport-7.STL" scale="1 1 1" />
+    <mesh name="uav_d5l10alsupport_8" file="UAV/UAV - D5L10Alsupport-8.STL" scale="1 1 1" />
+    <mesh name="uav_d5l10alsupport_9" file="UAV/UAV - D5L10Alsupport-9.STL" scale="1 1 1" />
+    <mesh name="uav_d5l40alsupport_1" file="UAV/UAV - D5L40Alsupport-1.STL" scale="1 1 1" />
+    <mesh name="uav_d5l40alsupport_2" file="UAV/UAV - D5L40Alsupport-2.STL" scale="1 1 1" />
+    <mesh name="uav_d5l40alsupport_3" file="UAV/UAV - D5L40Alsupport-3.STL" scale="1 1 1" />
+    <mesh name="uav_d5l40alsupport_4" file="UAV/UAV - D5L40Alsupport-4.STL" scale="1 1 1" />
+    <mesh name="uav_d5l50alsupport_1" file="UAV/UAV - D5L50Alsupport-1.STL" scale="1 1 1" />
+    <mesh name="uav_d5l50alsupport_2" file="UAV/UAV - D5L50Alsupport-2.STL" scale="1 1 1" />
+    <mesh name="uav_d5l50alsupport_3" file="UAV/UAV - D5L50Alsupport-3.STL" scale="1 1 1" />
+    <mesh name="uav_d5l50alsupport_4" file="UAV/UAV - D5L50Alsupport-4.STL" scale="1 1 1" />
+    <mesh name="uav_motor_2807_1300kv_1" file="UAV/UAV - Motor_2807_1300KV-1.STL" scale="1 1 1" />
+    <mesh name="uav_motor_2807_1300kv_2" file="UAV/UAV - Motor_2807_1300KV-2.STL" scale="1 1 1" />
+    <mesh name="uav_motor_2807_1300kv_3" file="UAV/UAV - Motor_2807_1300KV-3.STL" scale="1 1 1" />
+    <mesh name="uav_motor_2807_1300kv_4" file="UAV/UAV - Motor_2807_1300KV-4.STL" scale="1 1 1" />
+    <mesh name="uav_n100pc_1" file="UAV/UAV - N100PC-1.STL" scale="1 1 1" />
+    <mesh name="uav_pad_7nano_1" file="UAV/UAV - PAD_7NANO-1.STL" scale="1 1 1" />
+    <mesh name="uav_pad_7nano_2" file="UAV/UAV - PAD_7NANO-2.STL" scale="1 1 1" />
+    <mesh name="uav_pad_7nano_3" file="UAV/UAV - PAD_7NANO-3.STL" scale="1 1 1" />
+    <mesh name="uav_pad_7nano_4" file="UAV/UAV - PAD_7NANO-4.STL" scale="1 1 1" />
+    <mesh name="uav_pc_base_1" file="UAV/UAV - PC_Base-1.STL" scale="1 1 1" />
+    <mesh name="uav_prop_1" file="UAV/UAV - prop-1.STL" scale="1 1 1" />
+    <mesh name="uav_prop_2" file="UAV/UAV - prop-2.STL" scale="1 1 1" />
+    <mesh name="uav_prop_3" file="UAV/UAV - prop-3.STL" scale="1 1 1" />
+    <mesh name="uav_prop_4" file="UAV/UAV - prop-4.STL" scale="1 1 1" />
+    <mesh name="uav_uav_lower_arm_1" file="UAV/UAV - UAV_Lower_Arm-1.STL" scale="1 1 1" />
+    <mesh name="uav_uav_lower_arm_2" file="UAV/UAV - UAV_Lower_Arm-2.STL" scale="1 1 1" />
+    <mesh name="uav_uav_lower_arm_3" file="UAV/UAV - UAV_Lower_Arm-3.STL" scale="1 1 1" />
+    <mesh name="uav_uav_lower_arm_4" file="UAV/UAV - UAV_Lower_Arm-4.STL" scale="1 1 1" />
+    <mesh name="uav_uav_lower_board_1" file="UAV/UAV - UAV_Lower_board-1.STL" scale="1 1 1" />
+    <mesh name="uav_uav_upper_arm_1" file="UAV/UAV - UAV_Upper_Arm-1.STL" scale="1 1 1" />
+    <mesh name="uav_uav_upper_arm_2" file="UAV/UAV - UAV_Upper_Arm-2.STL" scale="1 1 1" />
+    <mesh name="uav_uav_upper_arm_3" file="UAV/UAV - UAV_Upper_Arm-3.STL" scale="1 1 1" />
+    <mesh name="uav_uav_upper_arm_4" file="UAV/UAV - UAV_Upper_Arm-4.STL" scale="1 1 1" />
+    <mesh name="uav_uav_upper_board_1" file="UAV/UAV - UAV_Upper_board-1.STL" scale="1 1 1" />
+    <material name="delta_base_mat" rgba="0.68 0.7 0.74 1" specular="0.25" shininess="0.15" />
+    <material name="delta_elbow_mat" rgba="0.45 0.58 0.82 1" specular="0.2" shininess="0.1" />
+    <material name="delta_platform_mat" rgba="0.95 0.55 0.18 1" specular="0.25" shininess="0.12" />
+    <material name="delta_link_mat" rgba="0.18 0.82 0.32 1" specular="0.2" shininess="0.1" />
+    <mesh name="delta_base_board_1" file="Delta/Delta_Base/Delta_Manipulator - Delta_Base-1 Delta_board-1.STL" scale="1 1 1" />
+    <mesh name="delta_base_board_2" file="Delta/Delta_Base/Delta_Manipulator - Delta_Base-1 Delta_board-2.STL" scale="1 1 1" />
+    <mesh name="delta_base_motor_1" file="Delta/Delta_Base/Delta_Manipulator - Delta_Base-1 Delta_motor-1.STL" scale="1 1 1" />
+    <mesh name="delta_base_motor_2" file="Delta/Delta_Base/Delta_Manipulator - Delta_Base-1 Delta_motor-2.STL" scale="1 1 1" />
+    <mesh name="delta_base_motor_3" file="Delta/Delta_Base/Delta_Manipulator - Delta_Base-1 Delta_motor-3.STL" scale="1 1 1" />
+    <mesh name="delta_elbow_connector_1" file="Delta/Delta_Elbow-3/Delta_Manipulator - Delta_Elbow-3 Delta_Elbow_connector-1.STL" scale="1 1 1" />
+    <mesh name="delta_elbow_frame_base_1" file="Delta/Delta_Elbow-3/Delta_Manipulator - Delta_Elbow-3 Delta_Frame_Base-1.STL" scale="1 1 1" />
+    <mesh name="delta_upper_arm_1" file="Delta/Delta_Elbow-3/Delta_Manipulator - Delta_Elbow-3 Delta_Upper_Arm-1.STL" scale="1 1 1" />
+    <mesh name="delta_elbow_balljoint_1" file="Delta/Delta_Elbow-3/Delta_Manipulator - Delta_Elbow-3 Delta_balljoint-1.STL" scale="1 1 1" />
+    <mesh name="delta_elbow_balljoint_2" file="Delta/Delta_Elbow-3/Delta_Manipulator - Delta_Elbow-3 Delta_balljoint-2.STL" scale="1 1 1" />
+    <mesh name="delta_motor_frame_1" file="Delta/Delta_Elbow-3/Delta_Manipulator - Delta_Elbow-3 Delta_motor_frame-1.STL" scale="1 1 1" />
+    <mesh name="delta2_elbow_connector_1" file="Delta/Delta_Elbow-2/Delta_Manipulator - Delta_Elbow-2 Delta_Elbow_connector-1.STL" scale="1 1 1" />
+    <mesh name="delta2_frame_base_1" file="Delta/Delta_Elbow-2/Delta_Manipulator - Delta_Elbow-2 Delta_Frame_Base-1.STL" scale="1 1 1" />
+    <mesh name="delta2_upper_arm_1" file="Delta/Delta_Elbow-2/Delta_Manipulator - Delta_Elbow-2 Delta_Upper_Arm-1.STL" scale="1 1 1" />
+    <mesh name="delta2_balljoint_1" file="Delta/Delta_Elbow-2/Delta_Manipulator - Delta_Elbow-2 Delta_balljoint-1.STL" scale="1 1 1" />
+    <mesh name="delta2_balljoint_2" file="Delta/Delta_Elbow-2/Delta_Manipulator - Delta_Elbow-2 Delta_balljoint-2.STL" scale="1 1 1" />
+    <mesh name="delta2_motor_frame_1" file="Delta/Delta_Elbow-2/Delta_Manipulator - Delta_Elbow-2 Delta_motor_frame-1.STL" scale="1 1 1" />
+    <mesh name="delta1_elbow_connector_1" file="Delta/Delta_Elbow-1/Delta_Manipulator - Delta_Elbow-1 Delta_Elbow_connector-1.STL" scale="1 1 1" />
+    <mesh name="delta1_frame_base_1" file="Delta/Delta_Elbow-1/Delta_Manipulator - Delta_Elbow-1 Delta_Frame_Base-1.STL" scale="1 1 1" />
+    <mesh name="delta1_upper_arm_1" file="Delta/Delta_Elbow-1/Delta_Manipulator - Delta_Elbow-1 Delta_Upper_Arm-1.STL" scale="1 1 1" />
+    <mesh name="delta1_balljoint_1" file="Delta/Delta_Elbow-1/Delta_Manipulator - Delta_Elbow-1 Delta_balljoint-1.STL" scale="1 1 1" />
+    <mesh name="delta1_balljoint_2" file="Delta/Delta_Elbow-1/Delta_Manipulator - Delta_Elbow-1 Delta_balljoint-2.STL" scale="1 1 1" />
+    <mesh name="delta1_motor_frame_1" file="Delta/Delta_Elbow-1/Delta_Manipulator - Delta_Elbow-1 Delta_motor_frame-1.STL" scale="1 1 1" />
+    <mesh name="delta_end_1" file="Delta/Delta_End_platform/Delta_Manipulator - Delta_End_platform-1 Delta_End-1.STL" scale="1 1 1" />
+    <mesh name="delta_end_balljoint_1" file="Delta/Delta_End_platform/Delta_Manipulator - Delta_End_platform-1 Delta_balljoint-1.STL" scale="1 1 1" />
+    <mesh name="delta_end_balljoint_2" file="Delta/Delta_End_platform/Delta_Manipulator - Delta_End_platform-1 Delta_balljoint-2.STL" scale="1 1 1" />
+    <mesh name="delta_end_balljoint_3" file="Delta/Delta_End_platform/Delta_Manipulator - Delta_End_platform-1 Delta_balljoint-3.STL" scale="1 1 1" />
+    <mesh name="delta_end_balljoint_4" file="Delta/Delta_End_platform/Delta_Manipulator - Delta_End_platform-1 Delta_balljoint-4.STL" scale="1 1 1" />
+    <mesh name="delta_end_balljoint_5" file="Delta/Delta_End_platform/Delta_Manipulator - Delta_End_platform-1 Delta_balljoint-5.STL" scale="1 1 1" />
+    <mesh name="delta_end_balljoint_6" file="Delta/Delta_End_platform/Delta_Manipulator - Delta_End_platform-1 Delta_balljoint-6.STL" scale="1 1 1" />
+    <mesh name="delta_lower_arm_1" file="Delta/Delta_Lower_Arm-1/Delta_Manipulator - Delta_Lower_Arm-1.STL" scale="1 1 1" />
+    <mesh name="delta_lower_arm_2" file="Delta/Delta_Lower_Arm-2/Delta_Manipulator - Delta_Lower_Arm-2.STL" scale="1 1 1" />
+    <mesh name="delta_lower_arm_4" file="Delta/Delta_Lower_Arm-4/Delta_Manipulator - Delta_Lower_Arm-4.STL" scale="1 1 1" />
+    <mesh name="delta_lower_arm_5" file="Delta/Delta_Lower_Arm-5/Delta_Manipulator - Delta_Lower_Arm-5.STL" scale="1 1 1" />
+    <mesh name="delta_lower_arm_6" file="Delta/Delta_Lower_Arm-6/Delta_Manipulator - Delta_Lower_Arm-6.STL" scale="1 1 1" />
+  </asset>
+  <default>
+    <default class="frame">
+      <geom type="mesh" density="1362.6680182945286" material="uav_mat" friction="0.8 0.1 0.1" solref="0.005 1" solimp="0.9 0.95 0.001" group="1" />
+    </default>
+    <default class="payload">
+      <geom type="mesh" density="1362.6680182945286" material="uav_mat" friction="0.8 0.1 0.1" solref="0.005 1" solimp="0.9 0.95 0.001" group="2" />
+    </default>
+    <default class="prop">
+      <geom type="mesh" density="1362.6680182945286" material="uav_prop_mat" friction="0.8 0.1 0.1" solref="0.005 1" solimp="0.9 0.95 0.001" group="1" contype="2" conaffinity="4" />
+    </default>
+    <default class="base">
+      <geom type="mesh" contype="2" conaffinity="4" friction="0.8 0.1 0.1" solref="0.005 1" solimp="0.9 0.95 0.001" material="delta_base_mat" group="0" rgba="0.68 0.7 0.74 1" />
+    </default>
+    <default class="elbow">
+      <geom type="mesh" contype="2" conaffinity="4" friction="0.8 0.1 0.1" solref="0.005 1" solimp="0.9 0.95 0.001" material="delta_elbow_mat" group="0" rgba="0.45 0.58 0.82 1" />
+    </default>
+    <default class="platform">
+      <geom type="mesh" contype="2" conaffinity="4" friction="0.8 0.1 0.1" solref="0.005 1" solimp="0.9 0.95 0.001" material="delta_platform_mat" group="0" rgba="0.95 0.55 0.18 1" />
+    </default>
+    <default class="link">
+      <geom type="mesh" contype="2" conaffinity="4" friction="0.8 0.1 0.1" solref="0.005 1" solimp="0.9 0.95 0.001" material="delta_link_mat" group="0" rgba="0.18 0.82 0.32 1" />
+    </default>
+  </default>
+  <worldbody>
+    <body name="uav" pos="0 0 0.75">
+      <freejoint />
+      <site name="imu" pos="0 0 0.02" size="0.005" rgba="0.2 0.8 1 1" />
+      <!-- PX4 Quad X rotor order: 1=front-left, 2=back-right, 3=front-right, 4=back-left -->
+      <site name="motor_1_site" pos="0.094 0.060 0.020" size="0.006" rgba="0.2 1 0.2 1" />
+      <site name="motor_2_site" pos="-0.094 -0.060 0.020" size="0.006" rgba="1 0.7 0.2 1" />
+      <site name="motor_3_site" pos="0.094 -0.060 0.020" size="0.006" rgba="1 0.2 0.2 1" />
+      <site name="motor_4_site" pos="-0.094 0.060 0.020" size="0.006" rgba="0.2 0.7 1 1" />
+      <body name="cad_frame" euler="0 -1.5707963267948966 0">
+      <body name="part_uav_11000mah_battery_1">
+        <geom class="payload" name="uav_11000mah_battery_1" mesh="uav_11000mah_battery_1" />
+      </body>
+      <body name="part_uav_7nano_base_1">
+        <geom class="payload" name="uav_7nano_base_1" mesh="uav_7nano_base_1" />
+      </body>
+      <body name="part_uav_7nano_1">
+        <geom class="payload" name="uav_7nano_1" mesh="uav_7nano_1" />
+      </body>
+      <body name="part_uav_cushion_pcb_1">
+        <geom class="payload" name="uav_cushion_pcb_1" mesh="uav_cushion_pcb_1" />
+      </body>
+      <body name="part_uav_cushion_pcb_2">
+        <geom class="payload" name="uav_cushion_pcb_2" mesh="uav_cushion_pcb_2" />
+      </body>
+      <body name="part_uav_cushion_pcb_3">
+        <geom class="payload" name="uav_cushion_pcb_3" mesh="uav_cushion_pcb_3" />
+      </body>
+      <body name="part_uav_cushion_pcb_4">
+        <geom class="payload" name="uav_cushion_pcb_4" mesh="uav_cushion_pcb_4" />
+      </body>
+      <body name="part_uav_d5l10alsupport_1">
+        <geom class="frame" name="uav_d5l10alsupport_1" mesh="uav_d5l10alsupport_1" />
+      </body>
+      <body name="part_uav_d5l10alsupport_10">
+        <geom class="frame" name="uav_d5l10alsupport_10" mesh="uav_d5l10alsupport_10" />
+      </body>
+      <body name="part_uav_d5l10alsupport_11">
+        <geom class="frame" name="uav_d5l10alsupport_11" mesh="uav_d5l10alsupport_11" />
+      </body>
+      <body name="part_uav_d5l10alsupport_12">
+        <geom class="frame" name="uav_d5l10alsupport_12" mesh="uav_d5l10alsupport_12" />
+      </body>
+      <body name="part_uav_d5l10alsupport_13">
+        <geom class="frame" name="uav_d5l10alsupport_13" mesh="uav_d5l10alsupport_13" />
+      </body>
+      <body name="part_uav_d5l10alsupport_14">
+        <geom class="frame" name="uav_d5l10alsupport_14" mesh="uav_d5l10alsupport_14" />
+      </body>
+      <body name="part_uav_d5l10alsupport_15">
+        <geom class="frame" name="uav_d5l10alsupport_15" mesh="uav_d5l10alsupport_15" />
+      </body>
+      <body name="part_uav_d5l10alsupport_16">
+        <geom class="frame" name="uav_d5l10alsupport_16" mesh="uav_d5l10alsupport_16" />
+      </body>
+      <body name="part_uav_d5l10alsupport_17">
+        <geom class="frame" name="uav_d5l10alsupport_17" mesh="uav_d5l10alsupport_17" />
+      </body>
+      <body name="part_uav_d5l10alsupport_18">
+        <geom class="frame" name="uav_d5l10alsupport_18" mesh="uav_d5l10alsupport_18" />
+      </body>
+      <body name="part_uav_d5l10alsupport_19">
+        <geom class="frame" name="uav_d5l10alsupport_19" mesh="uav_d5l10alsupport_19" />
+      </body>
+      <body name="part_uav_d5l10alsupport_2">
+        <geom class="frame" name="uav_d5l10alsupport_2" mesh="uav_d5l10alsupport_2" />
+      </body>
+      <body name="part_uav_d5l10alsupport_20">
+        <geom class="frame" name="uav_d5l10alsupport_20" mesh="uav_d5l10alsupport_20" />
+      </body>
+      <body name="part_uav_d5l10alsupport_21">
+        <geom class="frame" name="uav_d5l10alsupport_21" mesh="uav_d5l10alsupport_21" />
+      </body>
+      <body name="part_uav_d5l10alsupport_22">
+        <geom class="frame" name="uav_d5l10alsupport_22" mesh="uav_d5l10alsupport_22" />
+      </body>
+      <body name="part_uav_d5l10alsupport_23">
+        <geom class="frame" name="uav_d5l10alsupport_23" mesh="uav_d5l10alsupport_23" />
+      </body>
+      <body name="part_uav_d5l10alsupport_24">
+        <geom class="frame" name="uav_d5l10alsupport_24" mesh="uav_d5l10alsupport_24" />
+      </body>
+      <body name="part_uav_d5l10alsupport_25">
+        <geom class="frame" name="uav_d5l10alsupport_25" mesh="uav_d5l10alsupport_25" />
+      </body>
+      <body name="part_uav_d5l10alsupport_26">
+        <geom class="frame" name="uav_d5l10alsupport_26" mesh="uav_d5l10alsupport_26" />
+      </body>
+      <body name="part_uav_d5l10alsupport_27">
+        <geom class="frame" name="uav_d5l10alsupport_27" mesh="uav_d5l10alsupport_27" />
+      </body>
+      <body name="part_uav_d5l10alsupport_28">
+        <geom class="frame" name="uav_d5l10alsupport_28" mesh="uav_d5l10alsupport_28" />
+      </body>
+      <body name="part_uav_d5l10alsupport_29">
+        <geom class="frame" name="uav_d5l10alsupport_29" mesh="uav_d5l10alsupport_29" />
+      </body>
+      <body name="part_uav_d5l10alsupport_3">
+        <geom class="frame" name="uav_d5l10alsupport_3" mesh="uav_d5l10alsupport_3" />
+      </body>
+      <body name="part_uav_d5l10alsupport_30">
+        <geom class="frame" name="uav_d5l10alsupport_30" mesh="uav_d5l10alsupport_30" />
+      </body>
+      <body name="part_uav_d5l10alsupport_31">
+        <geom class="frame" name="uav_d5l10alsupport_31" mesh="uav_d5l10alsupport_31" />
+      </body>
+      <body name="part_uav_d5l10alsupport_32">
+        <geom class="frame" name="uav_d5l10alsupport_32" mesh="uav_d5l10alsupport_32" />
+      </body>
+      <body name="part_uav_d5l10alsupport_4">
+        <geom class="frame" name="uav_d5l10alsupport_4" mesh="uav_d5l10alsupport_4" />
+      </body>
+      <body name="part_uav_d5l10alsupport_5">
+        <geom class="frame" name="uav_d5l10alsupport_5" mesh="uav_d5l10alsupport_5" />
+      </body>
+      <body name="part_uav_d5l10alsupport_6">
+        <geom class="frame" name="uav_d5l10alsupport_6" mesh="uav_d5l10alsupport_6" />
+      </body>
+      <body name="part_uav_d5l10alsupport_7">
+        <geom class="frame" name="uav_d5l10alsupport_7" mesh="uav_d5l10alsupport_7" />
+      </body>
+      <body name="part_uav_d5l10alsupport_8">
+        <geom class="frame" name="uav_d5l10alsupport_8" mesh="uav_d5l10alsupport_8" />
+      </body>
+      <body name="part_uav_d5l10alsupport_9">
+        <geom class="frame" name="uav_d5l10alsupport_9" mesh="uav_d5l10alsupport_9" />
+      </body>
+      <body name="part_uav_d5l40alsupport_1">
+        <geom class="frame" name="uav_d5l40alsupport_1" mesh="uav_d5l40alsupport_1" />
+      </body>
+      <body name="part_uav_d5l40alsupport_2">
+        <geom class="frame" name="uav_d5l40alsupport_2" mesh="uav_d5l40alsupport_2" />
+      </body>
+      <body name="part_uav_d5l40alsupport_3">
+        <geom class="frame" name="uav_d5l40alsupport_3" mesh="uav_d5l40alsupport_3" />
+      </body>
+      <body name="part_uav_d5l40alsupport_4">
+        <geom class="frame" name="uav_d5l40alsupport_4" mesh="uav_d5l40alsupport_4" />
+      </body>
+      <body name="part_uav_d5l50alsupport_1">
+        <geom class="frame" name="uav_d5l50alsupport_1" mesh="uav_d5l50alsupport_1" />
+      </body>
+      <body name="part_uav_d5l50alsupport_2">
+        <geom class="frame" name="uav_d5l50alsupport_2" mesh="uav_d5l50alsupport_2" />
+      </body>
+      <body name="part_uav_d5l50alsupport_3">
+        <geom class="frame" name="uav_d5l50alsupport_3" mesh="uav_d5l50alsupport_3" />
+      </body>
+      <body name="part_uav_d5l50alsupport_4">
+        <geom class="frame" name="uav_d5l50alsupport_4" mesh="uav_d5l50alsupport_4" />
+      </body>
+      <body name="part_uav_n100pc_1">
+        <geom class="payload" name="uav_n100pc_1" mesh="uav_n100pc_1" />
+      </body>
+      <body name="part_uav_pad_7nano_1">
+        <geom class="payload" name="uav_pad_7nano_1" mesh="uav_pad_7nano_1" />
+      </body>
+      <body name="part_uav_pad_7nano_2">
+        <geom class="payload" name="uav_pad_7nano_2" mesh="uav_pad_7nano_2" />
+      </body>
+      <body name="part_uav_pad_7nano_3">
+        <geom class="payload" name="uav_pad_7nano_3" mesh="uav_pad_7nano_3" />
+      </body>
+      <body name="part_uav_pad_7nano_4">
+        <geom class="payload" name="uav_pad_7nano_4" mesh="uav_pad_7nano_4" />
+      </body>
+      <body name="part_uav_pc_base_1">
+        <geom class="payload" name="uav_pc_base_1" mesh="uav_pc_base_1" />
+      </body>
+      <body name="part_uav_uav_lower_arm_1">
+        <geom class="frame" name="uav_uav_lower_arm_1" mesh="uav_uav_lower_arm_1" />
+      </body>
+      <body name="part_uav_uav_lower_arm_2">
+        <geom class="frame" name="uav_uav_lower_arm_2" mesh="uav_uav_lower_arm_2" />
+      </body>
+      <body name="part_uav_uav_lower_arm_3">
+        <geom class="frame" name="uav_uav_lower_arm_3" mesh="uav_uav_lower_arm_3" />
+      </body>
+      <body name="part_uav_uav_lower_arm_4">
+        <geom class="frame" name="uav_uav_lower_arm_4" mesh="uav_uav_lower_arm_4" />
+      </body>
+      <body name="part_uav_uav_lower_board_1">
+        <geom class="frame" name="uav_uav_lower_board_1" mesh="uav_uav_lower_board_1" />
+      </body>
+      <body name="part_uav_uav_upper_arm_1">
+        <geom class="frame" name="uav_uav_upper_arm_1" mesh="uav_uav_upper_arm_1" />
+      </body>
+      <body name="part_uav_uav_upper_arm_2">
+        <geom class="frame" name="uav_uav_upper_arm_2" mesh="uav_uav_upper_arm_2" />
+      </body>
+      <body name="part_uav_uav_upper_arm_3">
+        <geom class="frame" name="uav_uav_upper_arm_3" mesh="uav_uav_upper_arm_3" />
+      </body>
+      <body name="part_uav_uav_upper_arm_4">
+        <geom class="frame" name="uav_uav_upper_arm_4" mesh="uav_uav_upper_arm_4" />
+      </body>
+      <body name="part_uav_uav_upper_board_1">
+        <geom class="frame" name="uav_uav_upper_board_1" mesh="uav_uav_upper_board_1" />
+      </body>
+      <body name="delta_mount" pos="0 0 -0.1071">
+        <body name="delta_base">
+          <geom class="base" name="delta_base_board_1" mesh="delta_base_board_1" mass="0.040" />
+          <geom class="base" name="delta_base_board_2" mesh="delta_base_board_2" mass="0.040" />
+          <geom class="base" name="delta_base_motor_1" mesh="delta_base_motor_1" mass="0.035" />
+          <geom class="base" name="delta_base_motor_2" mesh="delta_base_motor_2" mass="0.035" />
+          <geom class="base" name="delta_base_motor_3" mesh="delta_base_motor_3" mass="0.035" />
+          <body name="delta_elbow_2_mount" euler="0 0 2.0943951023931953">
+            <body name="delta_elbow_2" pos="0.0745 0 0">
+            <joint name="delta_elbow_2_hinge" type="hinge" pos="0 0 0" axis="0 -1 0" damping="0.01" limited="true" range="-1.5707963267948966 0.5235987755982988" ref="0" />
+              <geom class="elbow" name="delta2_elbow_connector_1" mesh="delta2_elbow_connector_1" mass="0.008" />
+              <geom class="elbow" name="delta2_frame_base_1" mesh="delta2_frame_base_1" mass="0.010" />
+              <geom class="elbow" name="delta2_upper_arm_1" mesh="delta2_upper_arm_1" mass="0.020" />
+              <geom class="elbow" name="delta2_balljoint_1" mesh="delta2_balljoint_1" mass="0.003" />
+              <geom class="elbow" name="delta2_balljoint_2" mesh="delta2_balljoint_2" mass="0.003" />
+              <geom class="elbow" name="delta2_motor_frame_1" mesh="delta2_motor_frame_1" mass="0.009" />
+              <body name="delta2_lower_arm_4" pos="0.1 -0.0262 0">
+                <joint name="delta2_lower_arm_4_ball" type="ball" pos="0 0 0" damping="0.01" />
+                <geom class="link" name="delta2_lower_arm_4" mesh="delta_lower_arm_4" mass="0.025" />
+                <site name="delta2_lower_arm_4_tip" pos="-0.1495 0 -0.1328" size="0.003" rgba="1 0.7 0.2 1" />
+              </body>
+              <body name="delta2_lower_arm_5" pos="0.1 0.0262 0">
+                <joint name="delta2_lower_arm_5_ball" type="ball" pos="0 0 0" damping="0.01" />
+                <geom class="link" name="delta2_lower_arm_5" mesh="delta_lower_arm_5" mass="0.025" />
+                <site name="delta2_lower_arm_5_tip" pos="-0.1495 0 -0.1328" size="0.003" rgba="1 0.3 0.8 1" />
+              </body>
+            </body>
+          </body>
+          <body name="delta_elbow_1_mount" euler="0 0 -2.0943951023931953">
+            <body name="delta_elbow_1" pos="0.0745 0 0">
+            <joint name="delta_elbow_1_hinge" type="hinge" pos="0 0 0" axis="0 -1 0" damping="0.01" limited="true" range="-1.5707963267948966 0.5235987755982988" ref="0" />
+              <geom class="elbow" name="delta1_elbow_connector_1" mesh="delta1_elbow_connector_1" mass="0.008" />
+              <geom class="elbow" name="delta1_frame_base_1" mesh="delta1_frame_base_1" mass="0.010" />
+              <geom class="elbow" name="delta1_upper_arm_1" mesh="delta1_upper_arm_1" mass="0.020" />
+              <geom class="elbow" name="delta1_balljoint_1" mesh="delta1_balljoint_1" mass="0.003" />
+              <geom class="elbow" name="delta1_balljoint_2" mesh="delta1_balljoint_2" mass="0.003" />
+              <geom class="elbow" name="delta1_motor_frame_1" mesh="delta1_motor_frame_1" mass="0.009" />
+              <body name="delta1_lower_arm_2" pos="0.1 -0.0262 0">
+                <joint name="delta1_lower_arm_2_ball" type="ball" pos="0 0 0" damping="0.01" />
+                <geom class="link" name="delta1_lower_arm_2" mesh="delta_lower_arm_2" mass="0.025" />
+                <site name="delta1_lower_arm_2_tip" pos="-0.1495 0 -0.1328" size="0.003" rgba="0.2 1 1 1" />
+              </body>
+              <body name="delta1_lower_arm_1" pos="0.1 0.0262 0">
+                <joint name="delta1_lower_arm_1_ball" type="ball" pos="0 0 0" damping="0.01" />
+                <geom class="link" name="delta1_lower_arm_1" mesh="delta_lower_arm_1" mass="0.025" />
+                <site name="delta1_lower_arm_1_tip" pos="-0.1495 0 -0.1328" size="0.003" rgba="1 1 0.2 1" />
+              </body>
+            </body>
+          </body>
+          <body name="delta_elbow_3" pos="0.0745 0 0">
+          <joint name="delta_elbow_3_hinge" type="hinge" pos="0 0 0" axis="0 -1 0" damping="0.01" limited="true" range="-1.5707963267948966 0.5235987755982988" ref="0" />
+            <geom class="elbow" name="delta_elbow_connector_1" mesh="delta_elbow_connector_1" mass="0.008" />
+            <geom class="elbow" name="delta_elbow_frame_base_1" mesh="delta_elbow_frame_base_1" mass="0.010" />
+            <geom class="elbow" name="delta_upper_arm_1" mesh="delta_upper_arm_1" mass="0.020" />
+            <geom class="elbow" name="delta_elbow_balljoint_1" mesh="delta_elbow_balljoint_1" mass="0.003" />
+            <geom class="elbow" name="delta_elbow_balljoint_2" mesh="delta_elbow_balljoint_2" mass="0.003" />
+            <geom class="elbow" name="delta_motor_frame_1" mesh="delta_motor_frame_1" mass="0.009" />
+            <body name="delta_lower_arm_6" pos="0.1 -0.0262 0">
+              <joint name="delta_lower_arm_6_ball" type="ball" pos="0 0 0" damping="0.01" />
+              <geom class="link" name="delta_lower_arm_6" mesh="delta_lower_arm_6" mass="0.025" />
+              <body name="delta_end_platform" pos="-0.1495 0 -0.1328">
+                <joint name="delta_end_platform_ball" type="ball" pos="0 0 0" damping="0.01" />
+                <geom class="platform" name="delta_end_1" mesh="delta_end_1" mass="0.038" />
+                <geom class="platform" name="delta_end_balljoint_1" mesh="delta_end_balljoint_1" mass="0.003" />
+                <geom class="platform" name="delta_end_balljoint_2" mesh="delta_end_balljoint_2" mass="0.003" />
+                <geom class="platform" name="delta_end_balljoint_3" mesh="delta_end_balljoint_3" mass="0.003" />
+                <geom class="platform" name="delta_end_balljoint_4" mesh="delta_end_balljoint_4" mass="0.003" />
+                <geom class="platform" name="delta_end_balljoint_5" mesh="delta_end_balljoint_5" mass="0.003" />
+                <geom class="platform" name="delta_end_balljoint_6" mesh="delta_end_balljoint_6" mass="0.003" />
+                <site name="delta_end_platform_joint_ypos" pos="0 0.0524 0" size="0.003" rgba="0.2 0.6 1 1" />
+                <site name="delta_end_platform_joint_2_site1" pos="-0.0148 0.0609 0" size="0.003" rgba="1 0.7 0.2 1" />
+                <site name="delta_end_platform_joint_2_site2" pos="-0.0601 0.0347 0" size="0.003" rgba="1 0.3 0.8 1" />
+                <site name="delta_end_platform_joint_1_site1" pos="-0.0601 0.0177 0" size="0.003" rgba="0.2 1 1 1" />
+                <site name="delta_end_platform_joint_1_site2" pos="-0.0148 -0.0085 0" size="0.003" rgba="1 1 0.2 1" />
+              </body>
+            </body>
+            <body name="delta_lower_arm_5" pos="0.1 0.0262 0">
+              <joint name="delta_lower_arm_5_ball" type="ball" pos="0 0 0" damping="0.01" />
+              <geom class="link" name="delta_lower_arm_5" mesh="delta_lower_arm_5" mass="0.025" />
+              <site name="delta_lower_arm_5_tip" pos="-0.1495 0 -0.1328" size="0.003" rgba="1 0.2 0.2 1" />
+            </body>
+          </body>
+        </body>
+      </body>
+      </body>
+      <body name="px4_rotor_1_front_left" pos="0.094 0.060 0.020" euler="0 -1.5707963267948966 0">
+        <geom class="frame" name="uav_motor_2807_1300kv_1" mesh="uav_motor_2807_1300kv_1" />
+        <geom class="prop" name="uav_prop_1" mesh="uav_prop_1" />
+      </body>
+      <body name="px4_rotor_2_back_right" pos="-0.094 -0.060 0.020" euler="0 -1.5707963267948966 0">
+        <geom class="frame" name="uav_motor_2807_1300kv_2" mesh="uav_motor_2807_1300kv_2" />
+        <geom class="prop" name="uav_prop_2" mesh="uav_prop_2" />
+      </body>
+      <body name="px4_rotor_3_front_right" pos="0.094 -0.060 0.020" euler="0 -1.5707963267948966 0">
+        <geom class="frame" name="uav_motor_2807_1300kv_3" mesh="uav_motor_2807_1300kv_3" />
+        <geom class="prop" name="uav_prop_3" mesh="uav_prop_3" />
+      </body>
+      <body name="px4_rotor_4_back_left" pos="-0.094 0.060 0.020" euler="0 -1.5707963267948966 0">
+        <geom class="frame" name="uav_motor_2807_1300kv_4" mesh="uav_motor_2807_1300kv_4" />
+        <geom class="prop" name="uav_prop_4" mesh="uav_prop_4" />
+      </body>
+    </body>
+  </worldbody>
+  <equality>
+    <connect name="delta_lower_arm_5_to_end_platform" site1="delta_lower_arm_5_tip" site2="delta_end_platform_joint_ypos" />
+    <connect name="delta2_lower_arm_4_to_end_platform" site1="delta2_lower_arm_4_tip" site2="delta_end_platform_joint_2_site1" />
+    <connect name="delta2_lower_arm_5_to_end_platform" site1="delta2_lower_arm_5_tip" site2="delta_end_platform_joint_2_site2" />
+    <connect name="delta1_lower_arm_2_to_end_platform" site1="delta1_lower_arm_2_tip" site2="delta_end_platform_joint_1_site1" />
+    <connect name="delta1_lower_arm_1_to_end_platform" site1="delta1_lower_arm_1_tip" site2="delta_end_platform_joint_1_site2" />
+  </equality>
+  <sensor>
+    <gyro name="body_gyro" site="imu" />
+    <accelerometer name="body_linacc" site="imu" />
+    <magnetometer name="body_mag" site="imu" />
+    <framequat name="body_quat" objtype="site" objname="imu" />
+    <framelinvel name="body_linvel" objtype="site" objname="imu" />
+    <framelinacc name="body_frameacc" objtype="site" objname="imu" />
+  </sensor>
+  <actuator>
+    <motor name="motor_1" site="motor_1_site" gear="0 0 1 0 0 0.05" ctrlrange="0 12" ctrllimited="true" />
+    <motor name="motor_2" site="motor_2_site" gear="0 0 1 0 0 0.05" ctrlrange="0 12" ctrllimited="true" />
+    <motor name="motor_3" site="motor_3_site" gear="0 0 1 0 0 -0.05" ctrlrange="0 12" ctrllimited="true" />
+    <motor name="motor_4" site="motor_4_site" gear="0 0 1 0 0 -0.05" ctrlrange="0 12" ctrllimited="true" />
+    <position name="delta_elbow_1_pos" joint="delta_elbow_1_hinge" kp="20" ctrlrange="-1.5707963267948966 0.5235987755982988" ctrllimited="true" />
+    <position name="delta_elbow_2_pos" joint="delta_elbow_2_hinge" kp="20" ctrlrange="-1.5707963267948966 0.5235987755982988" ctrllimited="true" />
+    <position name="delta_elbow_3_pos" joint="delta_elbow_3_hinge" kp="20" ctrlrange="-1.5707963267948966 0.5235987755982988" ctrllimited="true" />
+  </actuator>
+  <keyframe>
+    <key name="hover" qpos="0 0 0.75 1 0 0 0" ctrl="5.47 5.47 5.47 5.47 0 0 0" />
+  </keyframe>
+</mujoco>

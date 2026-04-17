@@ -1,0 +1,158 @@
+<mujoco model="Delta_Manipulator">
+  <compiler angle="radian" coordinate="local" inertiafromgeom="auto" />
+  <option timestep="0.002" gravity="0 0 -9.81" />
+  <asset>
+    <material name="delta_base_mat" rgba="0.68 0.7 0.74 1" specular="0.25" shininess="0.15" />
+    <material name="delta_elbow_mat" rgba="0.45 0.58 0.82 1" specular="0.2" shininess="0.1" />
+    <material name="delta_platform_mat" rgba="0.95 0.55 0.18 1" specular="0.25" shininess="0.12" />
+    <material name="delta_link_mat" rgba="0.18 0.82 0.32 1" specular="0.2" shininess="0.1" />
+    <mesh name="delta_base_board_1" file="Delta_Base/Delta_Manipulator - Delta_Base-1 Delta_board-1.STL" scale="1 1 1" />
+    <mesh name="delta_base_board_2" file="Delta_Base/Delta_Manipulator - Delta_Base-1 Delta_board-2.STL" scale="1 1 1" />
+    <mesh name="delta_base_motor_1" file="Delta_Base/Delta_Manipulator - Delta_Base-1 Delta_motor-1.STL" scale="1 1 1" />
+    <mesh name="delta_base_motor_2" file="Delta_Base/Delta_Manipulator - Delta_Base-1 Delta_motor-2.STL" scale="1 1 1" />
+    <mesh name="delta_base_motor_3" file="Delta_Base/Delta_Manipulator - Delta_Base-1 Delta_motor-3.STL" scale="1 1 1" />
+    <mesh name="delta_elbow_connector_1" file="Delta_Elbow-3/Delta_Manipulator - Delta_Elbow-3 Delta_Elbow_connector-1.STL" scale="1 1 1" />
+    <mesh name="delta_elbow_frame_base_1" file="Delta_Elbow-3/Delta_Manipulator - Delta_Elbow-3 Delta_Frame_Base-1.STL" scale="1 1 1" />
+    <mesh name="delta_upper_arm_1" file="Delta_Elbow-3/Delta_Manipulator - Delta_Elbow-3 Delta_Upper_Arm-1.STL" scale="1 1 1" />
+    <mesh name="delta_elbow_balljoint_1" file="Delta_Elbow-3/Delta_Manipulator - Delta_Elbow-3 Delta_balljoint-1.STL" scale="1 1 1" />
+    <mesh name="delta_elbow_balljoint_2" file="Delta_Elbow-3/Delta_Manipulator - Delta_Elbow-3 Delta_balljoint-2.STL" scale="1 1 1" />
+    <mesh name="delta_motor_frame_1" file="Delta_Elbow-3/Delta_Manipulator - Delta_Elbow-3 Delta_motor_frame-1.STL" scale="1 1 1" />
+    <mesh name="delta2_elbow_connector_1" file="Delta_Elbow-2/Delta_Manipulator - Delta_Elbow-2 Delta_Elbow_connector-1.STL" scale="1 1 1" />
+    <mesh name="delta2_frame_base_1" file="Delta_Elbow-2/Delta_Manipulator - Delta_Elbow-2 Delta_Frame_Base-1.STL" scale="1 1 1" />
+    <mesh name="delta2_upper_arm_1" file="Delta_Elbow-2/Delta_Manipulator - Delta_Elbow-2 Delta_Upper_Arm-1.STL" scale="1 1 1" />
+    <mesh name="delta2_balljoint_1" file="Delta_Elbow-2/Delta_Manipulator - Delta_Elbow-2 Delta_balljoint-1.STL" scale="1 1 1" />
+    <mesh name="delta2_balljoint_2" file="Delta_Elbow-2/Delta_Manipulator - Delta_Elbow-2 Delta_balljoint-2.STL" scale="1 1 1" />
+    <mesh name="delta2_motor_frame_1" file="Delta_Elbow-2/Delta_Manipulator - Delta_Elbow-2 Delta_motor_frame-1.STL" scale="1 1 1" />
+    <mesh name="delta1_elbow_connector_1" file="Delta_Elbow-1/Delta_Manipulator - Delta_Elbow-1 Delta_Elbow_connector-1.STL" scale="1 1 1" />
+    <mesh name="delta1_frame_base_1" file="Delta_Elbow-1/Delta_Manipulator - Delta_Elbow-1 Delta_Frame_Base-1.STL" scale="1 1 1" />
+    <mesh name="delta1_upper_arm_1" file="Delta_Elbow-1/Delta_Manipulator - Delta_Elbow-1 Delta_Upper_Arm-1.STL" scale="1 1 1" />
+    <mesh name="delta1_balljoint_1" file="Delta_Elbow-1/Delta_Manipulator - Delta_Elbow-1 Delta_balljoint-1.STL" scale="1 1 1" />
+    <mesh name="delta1_balljoint_2" file="Delta_Elbow-1/Delta_Manipulator - Delta_Elbow-1 Delta_balljoint-2.STL" scale="1 1 1" />
+    <mesh name="delta1_motor_frame_1" file="Delta_Elbow-1/Delta_Manipulator - Delta_Elbow-1 Delta_motor_frame-1.STL" scale="1 1 1" />
+    <mesh name="delta_end_1" file="Delta_End_platform/Delta_Manipulator - Delta_End_platform-1 Delta_End-1.STL" scale="1 1 1" />
+    <mesh name="delta_end_balljoint_1" file="Delta_End_platform/Delta_Manipulator - Delta_End_platform-1 Delta_balljoint-1.STL" scale="1 1 1" />
+    <mesh name="delta_end_balljoint_2" file="Delta_End_platform/Delta_Manipulator - Delta_End_platform-1 Delta_balljoint-2.STL" scale="1 1 1" />
+    <mesh name="delta_end_balljoint_3" file="Delta_End_platform/Delta_Manipulator - Delta_End_platform-1 Delta_balljoint-3.STL" scale="1 1 1" />
+    <mesh name="delta_end_balljoint_4" file="Delta_End_platform/Delta_Manipulator - Delta_End_platform-1 Delta_balljoint-4.STL" scale="1 1 1" />
+    <mesh name="delta_end_balljoint_5" file="Delta_End_platform/Delta_Manipulator - Delta_End_platform-1 Delta_balljoint-5.STL" scale="1 1 1" />
+    <mesh name="delta_end_balljoint_6" file="Delta_End_platform/Delta_Manipulator - Delta_End_platform-1 Delta_balljoint-6.STL" scale="1 1 1" />
+    <mesh name="delta_lower_arm_1" file="Delta_Lower_Arm-1/Delta_Manipulator - Delta_Lower_Arm-1.STL" scale="1 1 1" />
+    <mesh name="delta_lower_arm_2" file="Delta_Lower_Arm-2/Delta_Manipulator - Delta_Lower_Arm-2.STL" scale="1 1 1" />
+    <mesh name="delta_lower_arm_4" file="Delta_Lower_Arm-4/Delta_Manipulator - Delta_Lower_Arm-4.STL" scale="1 1 1" />
+    <mesh name="delta_lower_arm_5" file="Delta_Lower_Arm-5/Delta_Manipulator - Delta_Lower_Arm-5.STL" scale="1 1 1" />
+    <mesh name="delta_lower_arm_6" file="Delta_Lower_Arm-6/Delta_Manipulator - Delta_Lower_Arm-6.STL" scale="1 1 1" />
+  </asset>
+  <default>
+    <geom type="mesh" contype="2" conaffinity="4" friction="0.8 0.1 0.1" solref="0.005 1" solimp="0.9 0.95 0.001" />
+    <default class="base">
+      <geom material="delta_base_mat" group="0" rgba="0.68 0.7 0.74 1" />
+    </default>
+    <default class="elbow">
+      <geom material="delta_elbow_mat" group="0" rgba="0.45 0.58 0.82 1" />
+    </default>
+    <default class="platform">
+      <geom material="delta_platform_mat" group="0" rgba="0.95 0.55 0.18 1" />
+    </default>
+    <default class="link">
+      <geom material="delta_link_mat" group="0" rgba="0.18 0.82 0.32 1" />
+    </default>
+  </default>
+  <worldbody>
+    <body name="delta" pos="0 0 0.4">
+      <body name="delta_base">
+        <geom class="base" name="delta_base_board_1" mesh="delta_base_board_1" mass="0.040" />
+        <geom class="base" name="delta_base_board_2" mesh="delta_base_board_2" mass="0.040" />
+        <geom class="base" name="delta_base_motor_1" mesh="delta_base_motor_1" mass="0.035" />
+        <geom class="base" name="delta_base_motor_2" mesh="delta_base_motor_2" mass="0.035" />
+        <geom class="base" name="delta_base_motor_3" mesh="delta_base_motor_3" mass="0.035" />
+        <body name="delta_elbow_2_mount" euler="0 0 2.0943951023931953">
+          <body name="delta_elbow_2" pos="0.0745 0 0">
+            <joint name="delta_elbow_2_hinge" type="hinge" pos="0 0 0" axis="0 -1 0" damping="0.01" limited="true" range="-0.5235987755982988 1.5707963267948966" ref="0" />
+            <geom class="elbow" name="delta2_elbow_connector_1" mesh="delta2_elbow_connector_1" mass="0.008" />
+            <geom class="elbow" name="delta2_frame_base_1" mesh="delta2_frame_base_1" mass="0.010" />
+            <geom class="elbow" name="delta2_upper_arm_1" mesh="delta2_upper_arm_1" mass="0.020" />
+            <geom class="elbow" name="delta2_balljoint_1" mesh="delta2_balljoint_1" mass="0.003" />
+            <geom class="elbow" name="delta2_balljoint_2" mesh="delta2_balljoint_2" mass="0.003" />
+            <geom class="elbow" name="delta2_motor_frame_1" mesh="delta2_motor_frame_1" mass="0.009" />
+            <body name="delta2_lower_arm_4" pos="0.1 -0.0262 0">
+              <joint name="delta2_lower_arm_4_ball" type="ball" pos="0 0 0" damping="0.01" />
+              <geom class="link" name="delta2_lower_arm_4" mesh="delta_lower_arm_4" mass="0.025" />
+              <site name="delta2_lower_arm_4_tip" pos="-0.1495 0 -0.1328" size="0.003" rgba="1 0.7 0.2 1" />
+            </body>
+            <body name="delta2_lower_arm_5" pos="0.1 0.0262 0">
+              <joint name="delta2_lower_arm_5_ball" type="ball" pos="0 0 0" damping="0.01" />
+              <geom class="link" name="delta2_lower_arm_5" mesh="delta_lower_arm_5" mass="0.025" />
+              <site name="delta2_lower_arm_5_tip" pos="-0.1495 0 -0.1328" size="0.003" rgba="1 0.3 0.8 1" />
+            </body>
+          </body>
+        </body>
+        <body name="delta_elbow_1_mount" euler="0 0 -2.0943951023931953">
+          <body name="delta_elbow_1" pos="0.0745 0 0">
+            <joint name="delta_elbow_1_hinge" type="hinge" pos="0 0 0" axis="0 -1 0" damping="0.01" limited="true" range="-0.5235987755982988 1.5707963267948966" ref="0" />
+            <geom class="elbow" name="delta1_elbow_connector_1" mesh="delta1_elbow_connector_1" mass="0.008" />
+            <geom class="elbow" name="delta1_frame_base_1" mesh="delta1_frame_base_1" mass="0.010" />
+            <geom class="elbow" name="delta1_upper_arm_1" mesh="delta1_upper_arm_1" mass="0.020" />
+            <geom class="elbow" name="delta1_balljoint_1" mesh="delta1_balljoint_1" mass="0.003" />
+            <geom class="elbow" name="delta1_balljoint_2" mesh="delta1_balljoint_2" mass="0.003" />
+            <geom class="elbow" name="delta1_motor_frame_1" mesh="delta1_motor_frame_1" mass="0.009" />
+            <body name="delta1_lower_arm_2" pos="0.1 -0.0262 0">
+              <joint name="delta1_lower_arm_2_ball" type="ball" pos="0 0 0" damping="0.01" />
+              <geom class="link" name="delta1_lower_arm_2" mesh="delta_lower_arm_2" mass="0.025" />
+              <site name="delta1_lower_arm_2_tip" pos="-0.1495 0 -0.1328" size="0.003" rgba="0.2 1 1 1" />
+            </body>
+            <body name="delta1_lower_arm_1" pos="0.1 0.0262 0">
+              <joint name="delta1_lower_arm_1_ball" type="ball" pos="0 0 0" damping="0.01" />
+              <geom class="link" name="delta1_lower_arm_1" mesh="delta_lower_arm_1" mass="0.025" />
+              <site name="delta1_lower_arm_1_tip" pos="-0.1495 0 -0.1328" size="0.003" rgba="1 1 0.2 1" />
+            </body>
+          </body>
+        </body>
+        <body name="delta_elbow_3" pos="0.0745 0 0">
+          <joint name="delta_elbow_3_hinge" type="hinge" pos="0 0 0" axis="0 -1 0" damping="0.01" limited="true" range="-0.5235987755982988 1.5707963267948966" ref="0" />
+          <geom class="elbow" name="delta_elbow_connector_1" mesh="delta_elbow_connector_1" mass="0.008" />
+          <geom class="elbow" name="delta_elbow_frame_base_1" mesh="delta_elbow_frame_base_1" mass="0.010" />
+          <geom class="elbow" name="delta_upper_arm_1" mesh="delta_upper_arm_1" mass="0.020" />
+          <geom class="elbow" name="delta_elbow_balljoint_1" mesh="delta_elbow_balljoint_1" mass="0.003" />
+          <geom class="elbow" name="delta_elbow_balljoint_2" mesh="delta_elbow_balljoint_2" mass="0.003" />
+          <geom class="elbow" name="delta_motor_frame_1" mesh="delta_motor_frame_1" mass="0.009" />
+          <body name="delta_lower_arm_6" pos="0.1 -0.0262 0">
+            <joint name="delta_lower_arm_6_ball" type="ball" pos="0 0 0" damping="0.01" />
+            <geom class="link" name="delta_lower_arm_6" mesh="delta_lower_arm_6" mass="0.025" />
+            <body name="delta_end_platform" pos="-0.1495 0 -0.1328">
+              <joint name="delta_end_platform_ball" type="ball" pos="0 0 0" damping="0.01" />
+              <geom class="platform" name="delta_end_1" mesh="delta_end_1" mass="0.038" />
+              <geom class="platform" name="delta_end_balljoint_1" mesh="delta_end_balljoint_1" mass="0.003" />
+              <geom class="platform" name="delta_end_balljoint_2" mesh="delta_end_balljoint_2" mass="0.003" />
+              <geom class="platform" name="delta_end_balljoint_3" mesh="delta_end_balljoint_3" mass="0.003" />
+              <geom class="platform" name="delta_end_balljoint_4" mesh="delta_end_balljoint_4" mass="0.003" />
+              <geom class="platform" name="delta_end_balljoint_5" mesh="delta_end_balljoint_5" mass="0.003" />
+              <geom class="platform" name="delta_end_balljoint_6" mesh="delta_end_balljoint_6" mass="0.003" />
+              <site name="delta_end_platform_joint_ypos" pos="0 0.0524 0" size="0.003" rgba="0.2 0.6 1 1" />
+              <site name="delta_end_platform_joint_2_site1" pos="-0.0148 0.0609 0" size="0.003" rgba="1 0.7 0.2 1" />
+              <site name="delta_end_platform_joint_2_site2" pos="-0.0601 0.0347 0" size="0.003" rgba="1 0.3 0.8 1" />
+              <site name="delta_end_platform_joint_1_site1" pos="-0.0601 0.0177 0" size="0.003" rgba="0.2 1 1 1" />
+              <site name="delta_end_platform_joint_1_site2" pos="-0.0148 -0.0085 0" size="0.003" rgba="1 1 0.2 1" />
+            </body>
+          </body>
+          <body name="delta_lower_arm_5" pos="0.1 0.0262 0">
+            <joint name="delta_lower_arm_5_ball" type="ball" pos="0 0 0" damping="0.01" />
+            <geom class="link" name="delta_lower_arm_5" mesh="delta_lower_arm_5" mass="0.025" />
+            <site name="delta_lower_arm_5_tip" pos="-0.1495 0 -0.1328" size="0.003" rgba="1 0.2 0.2 1" />
+          </body>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+  <equality>
+    <connect name="delta_lower_arm_5_to_end_platform" site1="delta_lower_arm_5_tip" site2="delta_end_platform_joint_ypos" />
+    <connect name="delta2_lower_arm_4_to_end_platform" site1="delta2_lower_arm_4_tip" site2="delta_end_platform_joint_2_site1" />
+    <connect name="delta2_lower_arm_5_to_end_platform" site1="delta2_lower_arm_5_tip" site2="delta_end_platform_joint_2_site2" />
+    <connect name="delta1_lower_arm_2_to_end_platform" site1="delta1_lower_arm_2_tip" site2="delta_end_platform_joint_1_site1" />
+    <connect name="delta1_lower_arm_1_to_end_platform" site1="delta1_lower_arm_1_tip" site2="delta_end_platform_joint_1_site2" />
+  </equality>
+  <actuator>
+    <position name="delta_elbow_1_pos" joint="delta_elbow_1_hinge" kp="20" ctrlrange="-0.5235987755982988 1.5707963267948966" ctrllimited="true" />
+    <position name="delta_elbow_2_pos" joint="delta_elbow_2_hinge" kp="20" ctrlrange="-0.5235987755982988 1.5707963267948966" ctrllimited="true" />
+    <position name="delta_elbow_3_pos" joint="delta_elbow_3_hinge" kp="20" ctrlrange="-0.5235987755982988 1.5707963267948966" ctrllimited="true" />
+  </actuator>
+</mujoco>

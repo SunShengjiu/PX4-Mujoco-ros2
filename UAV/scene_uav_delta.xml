@@ -1,0 +1,36 @@
+<mujoco model="UAV_Delta_scene">
+  <include file="UAV_Delta.xml" />
+  <statistic center="0 0 0.28" extent="2" />
+  <visual>
+    <headlight ambient="0.25 0.25 0.25" diffuse="0.65 0.65 0.65" specular="0.2 0.2 0.2" />
+    <rgba haze="0.15 0.2 0.25 1" />
+    <quality shadowsize="4096" />
+  </visual>
+  <asset>
+    <texture name="grid" type="2d" builtin="checker" width="512" height="512" rgb1="0.24 0.28 0.32" rgb2="0.14 0.17 0.2" />
+    <material name="ground_mat" texture="grid" texrepeat="4 4" texuniform="true" reflectance="0.2" />
+    <material name="helipad_mat" rgba="0.72 0.45 0.18 1" specular="0.2" shininess="0.1" />
+    <mesh name="helipad_mesh" file="Helipad/UAV_Delta_Manipulator - Helipad-1.STL" scale="1 1 1" />
+  </asset>
+  <worldbody>
+    <light name="sun" directional="true" pos="0 0 4" dir="0 0 -1" diffuse="0.8 0.8 0.8" specular="0.15 0.15 0.15" />
+    <light name="fill" pos="1.5 -1.5 2.5" dir="-1 1 -2" diffuse="0.35 0.35 0.35" />
+    <camera name="overview" pos="1.7 -1.7 1.0" xyaxes="0.707 0.707 0 -0.235 0.235 0.943" />
+    <geom name="ground" type="plane" size="5 5 0.1" material="ground_mat" condim="3" contype="5" conaffinity="3" />
+    <body name="helipad" pos="0 0 0">
+      <geom name="helipad_visual" type="mesh" mesh="helipad_mesh" material="helipad_mat" pos="0 0 0" contype="0" conaffinity="0" />
+      <geom name="helipad_col_00" type="box" pos="0.1555 0 0.25" size="0.002 0.04 0.25" euler="0 0 0" contype="5" conaffinity="3" rgba="0 0 0 0" />
+      <geom name="helipad_col_01" type="box" pos="0.134666 0.07775 0.25" size="0.002 0.04 0.25" euler="0 0 0.5235987755982988" contype="5" conaffinity="3" rgba="0 0 0 0" />
+      <geom name="helipad_col_02" type="box" pos="0.07775 0.134666 0.25" size="0.002 0.04 0.25" euler="0 0 1.0471975511965976" contype="5" conaffinity="3" rgba="0 0 0 0" />
+      <geom name="helipad_col_03" type="box" pos="0 0.1555 0.25" size="0.002 0.04 0.25" euler="0 0 1.5707963267948966" contype="5" conaffinity="3" rgba="0 0 0 0" />
+      <geom name="helipad_col_04" type="box" pos="-0.07775 0.134666 0.25" size="0.002 0.04 0.25" euler="0 0 2.0943951023931953" contype="5" conaffinity="3" rgba="0 0 0 0" />
+      <geom name="helipad_col_05" type="box" pos="-0.134666 0.07775 0.25" size="0.002 0.04 0.25" euler="0 0 2.6179938779914944" contype="5" conaffinity="3" rgba="0 0 0 0" />
+      <geom name="helipad_col_06" type="box" pos="-0.1555 0 0.25" size="0.002 0.04 0.25" euler="0 0 3.141592653589793" contype="5" conaffinity="3" rgba="0 0 0 0" />
+      <geom name="helipad_col_07" type="box" pos="-0.134666 -0.07775 0.25" size="0.002 0.04 0.25" euler="0 0 3.6651914291880923" contype="5" conaffinity="3" rgba="0 0 0 0" />
+      <geom name="helipad_col_08" type="box" pos="-0.07775 -0.134666 0.25" size="0.002 0.04 0.25" euler="0 0 4.1887902047863905" contype="5" conaffinity="3" rgba="0 0 0 0" />
+      <geom name="helipad_col_09" type="box" pos="0 -0.1555 0.25" size="0.002 0.04 0.25" euler="0 0 4.71238898038469" contype="5" conaffinity="3" rgba="0 0 0 0" />
+      <geom name="helipad_col_10" type="box" pos="0.07775 -0.134666 0.25" size="0.002 0.04 0.25" euler="0 0 5.235987755982989" contype="5" conaffinity="3" rgba="0 0 0 0" />
+      <geom name="helipad_col_11" type="box" pos="0.134666 -0.07775 0.25" size="0.002 0.04 0.25" euler="0 0 5.759586531581287" contype="5" conaffinity="3" rgba="0 0 0 0" />
+    </body>
+  </worldbody>
+</mujoco>
