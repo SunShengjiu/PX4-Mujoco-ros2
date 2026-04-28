@@ -141,13 +141,13 @@
   <worldbody>
     <body name="uav" pos="0 0 0.75">
       <freejoint />
-      <site name="imu" pos="0 0 0.02" size="0.005" rgba="0.2 0.8 1 1" />
+      <site name="imu" pos="0 0 0" size="0.005" rgba="0.2 0.8 1 1"/>
       <!-- PX4 Quad X rotor order: 1=front-left, 2=back-right, 3=front-right, 4=back-left -->
-      <site name="motor_1_site" pos="0.094 0.060 0.020" size="0.006" rgba="0.2 1 0.2 1" />
-      <site name="motor_2_site" pos="-0.094 -0.060 0.020" size="0.006" rgba="1 0.7 0.2 1" />
-      <site name="motor_3_site" pos="0.094 -0.060 0.020" size="0.006" rgba="1 0.2 0.2 1" />
-      <site name="motor_4_site" pos="-0.094 0.060 0.020" size="0.006" rgba="0.2 0.7 1 1" />
-      <body name="cad_frame" euler="0 -1.5707963267948966 0">
+      <site name="motor_1_site" pos="0.1414 -0.1414 -0.0152" size="0.006" rgba="0.2 1 0.2 1"/>
+      <site name="motor_2_site" pos="-0.1414 -0.1414 -0.0152" size="0.006" rgba="1 0.7 0.2 1"/>
+      <site name="motor_3_site" pos="-0.1414 0.1414 -0.0152" size="0.006" rgba="1 0.2 0.2 1"/>
+      <site name="motor_4_site" pos="0.1414 0.1414 -0.0152" size="0.006" rgba="0.2 0.7 1 1"/>
+      <body name="cad_frame" euler="0 0 0">
       <body name="part_uav_11000mah_battery_1">
         <geom class="payload" name="uav_11000mah_battery_1" mesh="uav_11000mah_battery_1" />
       </body>
@@ -155,7 +155,7 @@
         <geom class="payload" name="uav_7nano_base_1" mesh="uav_7nano_base_1" />
       </body>
       <body name="part_uav_7nano_1">
-        <geom class="payload" name="uav_7nano_1" mesh="uav_7nano_1" />
+        <geom class="payload" name="uav_7nano_1" mesh="uav_7nano_1" rgba="0.75 0.75 0.78 0.5"/>
       </body>
       <body name="part_uav_cushion_pcb_1">
         <geom class="payload" name="uav_cushion_pcb_1" mesh="uav_cushion_pcb_1" />
@@ -422,21 +422,21 @@
         </body>
       </body>
       </body>
-      <body name="px4_rotor_1_front_left" pos="0.094 0.060 0.020" euler="0 -1.5707963267948966 0">
-        <geom class="frame" name="uav_motor_2807_1300kv_1" mesh="uav_motor_2807_1300kv_1" />
-        <geom class="prop" name="uav_prop_1" mesh="uav_prop_1" />
+      <body name="px4_rotor_1_front_left" >
+        <geom class="frame" name="uav_motor_2807_1300kv_1" mesh="uav_motor_2807_1300kv_1" rgba="0.75 0.75 0.78 0.5"/>
+        <geom class="prop" name="uav_prop_1" mesh="uav_prop_1" rgba="0.75 0.75 0.28 0.3"/>
       </body>
-      <body name="px4_rotor_2_back_right" pos="-0.094 -0.060 0.020" euler="0 -1.5707963267948966 0">
-        <geom class="frame" name="uav_motor_2807_1300kv_2" mesh="uav_motor_2807_1300kv_2" />
-        <geom class="prop" name="uav_prop_2" mesh="uav_prop_2" />
+      <body name="px4_rotor_2_back_right" >
+        <geom class="frame" name="uav_motor_2807_1300kv_2" mesh="uav_motor_2807_1300kv_2" rgba="0.75 0.75 0.78 0.5"/>
+        <geom class="prop" name="uav_prop_2" mesh="uav_prop_2" rgba="0.75 0.75 0.28 0.3"/>
       </body>
-      <body name="px4_rotor_3_front_right" pos="0.094 -0.060 0.020" euler="0 -1.5707963267948966 0">
-        <geom class="frame" name="uav_motor_2807_1300kv_3" mesh="uav_motor_2807_1300kv_3" />
-        <geom class="prop" name="uav_prop_3" mesh="uav_prop_3" />
+      <body name="px4_rotor_3_front_right" >
+        <geom class="frame" name="uav_motor_2807_1300kv_3" mesh="uav_motor_2807_1300kv_3" rgba="0.75 0.75 0.78 0.5"/>
+        <geom class="prop" name="uav_prop_3" mesh="uav_prop_3" rgba="0.75 0.75 0.28 0.3"/>
       </body>
-      <body name="px4_rotor_4_back_left" pos="-0.094 0.060 0.020" euler="0 -1.5707963267948966 0">
-        <geom class="frame" name="uav_motor_2807_1300kv_4" mesh="uav_motor_2807_1300kv_4" />
-        <geom class="prop" name="uav_prop_4" mesh="uav_prop_4" />
+      <body name="px4_rotor_4_back_left" >
+        <geom class="frame" name="uav_motor_2807_1300kv_4" mesh="uav_motor_2807_1300kv_4" rgba="0.75 0.75 0.78 0.5"/>
+        <geom class="prop" name="uav_prop_4" mesh="uav_prop_4" rgba="0.75 0.75 0.28 0.3"/>
       </body>
     </body>
   </worldbody>
@@ -456,10 +456,10 @@
     <framelinacc name="body_frameacc" objtype="site" objname="imu" />
   </sensor>
   <actuator>
-    <motor name="motor_1" site="motor_1_site" gear="0 0 1 0 0 0.05" ctrlrange="0 12" ctrllimited="true" />
-    <motor name="motor_2" site="motor_2_site" gear="0 0 1 0 0 0.05" ctrlrange="0 12" ctrllimited="true" />
-    <motor name="motor_3" site="motor_3_site" gear="0 0 1 0 0 -0.05" ctrlrange="0 12" ctrllimited="true" />
-    <motor name="motor_4" site="motor_4_site" gear="0 0 1 0 0 -0.05" ctrlrange="0 12" ctrllimited="true" />
+    <motor name="motor_1" site="motor_4_site" gear="0 0 1 0 0 0.05" ctrlrange="0 12" ctrllimited="true"/>
+    <motor name="motor_2" site="motor_2_site" gear="0 0 1 0 0 0.05" ctrlrange="0 12" ctrllimited="true"/>
+    <motor name="motor_3" site="motor_1_site" gear="0 0 1 0 0 -0.05" ctrlrange="0 12" ctrllimited="true"/>
+    <motor name="motor_4" site="motor_3_site" gear="0 0 1 0 0 -0.05" ctrlrange="0 12" ctrllimited="true"/>
     <position name="delta_elbow_1_pos" joint="delta_elbow_1_hinge" kp="20" ctrlrange="-1.5707963267948966 0.5235987755982988" ctrllimited="true" />
     <position name="delta_elbow_2_pos" joint="delta_elbow_2_hinge" kp="20" ctrlrange="-1.5707963267948966 0.5235987755982988" ctrllimited="true" />
     <position name="delta_elbow_3_pos" joint="delta_elbow_3_hinge" kp="20" ctrlrange="-1.5707963267948966 0.5235987755982988" ctrllimited="true" />
