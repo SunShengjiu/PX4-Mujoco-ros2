@@ -22,6 +22,7 @@ from __future__ import annotations
 import argparse
 import math
 import os
+import threading
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -30,7 +31,7 @@ from typing import Optional
 import mujoco
 import numpy as np
 
-from frames import flu_to_frd, mujoco_quat_to_px4_frd_to_ned, mujoco_world_to_ned
+from frames import flu_to_frd, mujoco_quat_to_px4_frd_to_ned, mujoco_world_to_ned, quat_wxyz_to_rotmat
 
 try:
     import mujoco.viewer
@@ -41,6 +42,23 @@ try:
     import glfw
 except Exception:
     glfw = None
+
+try:
+    import rclpy
+    from rclpy.node import Node as RosNode
+    from rclpy.qos import DurabilityPolicy as RosDurabilityPolicy
+    from rclpy.qos import HistoryPolicy as RosHistoryPolicy
+    from rclpy.qos import QoSProfile as RosQoSProfile
+    from rclpy.qos import ReliabilityPolicy as RosReliabilityPolicy
+    from px4_msgs.msg import VehicleOdometry as RosVehicleOdometry
+except Exception:
+    rclpy = None
+    RosNode = None
+    RosDurabilityPolicy = None
+    RosHistoryPolicy = None
+    RosQoSProfile = None
+    RosReliabilityPolicy = None
+    RosVehicleOdometry = None
 
 try:
     os.environ.setdefault("MAVLINK20", "1")
@@ -69,6 +87,21 @@ KEY_STEP_ONCE = getattr(glfw, "KEY_PERIOD", 46) if glfw is not None else 46
 REQUIRED_HIL_SENSORS = ("body_gyro", "body_linacc")
 OPTIONAL_HIL_SENSORS = ("body_mag",)
 FLIGHT_ACTUATOR_NAMES = ("motor_1", "motor_2", "motor_3", "motor_4")
+FLIGHT_ACTUATOR_SITE_NAMES = {
+    "motor_1": "motor_4_site",
+    "motor_2": "motor_2_site",
+    "motor_3": "motor_1_site",
+    "motor_4": "motor_3_site",
+}
+ACCEL_NOISE_STDDEV = 0.03
+GYRO_NOISE_STDDEV = 0.002
+MAG_NOISE_STDDEV = 0.0005
+BARO_PRESSURE_NOISE_STDDEV = 0.03
+BARO_ALT_NOISE_STDDEV = 0.03
+BARO_TEMP_NOISE_STDDEV = 0.02
+GRAVITY_WORLD = np.array([0.0, 0.0, -9.81], dtype=float)
+PRESETTLE_DURATION_SECONDS = 1.5
+PX4_ALIGNMENT_HOLD_SECONDS = 2.0
 
 
 @dataclass
@@ -78,11 +111,20 @@ class BridgeConfig:
     model: Path = DEFAULT_MODEL
     mavlink_host: str = "0.0.0.0"
     mavlink_port: int = 4560
+    actuator_mavlink_port: Optional[int] = None
     no_mavlink: bool = False
     headless: bool = False
     steps: Optional[int] = None
     px4_hover_thrust: float = 0.60
     real_time_factor: float = 1.0
+    send_hil_gps: bool = False
+    local_hover: bool = False
+    local_hover_target_z: float = 2.0
+    local_hover_ramp_seconds: float = 3.0
+    publish_visual_odometry_ros2: bool = False
+    ready_file: Optional[Path] = None
+    connected_file: Optional[Path] = None
+    debug_controls: bool = False
 
 
 class MuJoCoSim:
@@ -108,6 +150,7 @@ class MuJoCoSim:
             if name in self._actuator_name_to_id
         ]
         self._has_named_flight_actuators = len(self._flight_actuator_ids) == len(FLIGHT_ACTUATOR_NAMES)
+        self._flight_actuator_wrench_matrix = self._build_flight_actuator_wrench_matrix()
         self._sensor_cache = {}
         self._viewer = None
         self._paused = False
@@ -195,6 +238,77 @@ class MuJoCoSim:
         else:
             self.zero_ctrl()
 
+    def _actuator_site_id(self, actuator_name: str, actuator_id: int) -> int:
+        site_name = FLIGHT_ACTUATOR_SITE_NAMES.get(actuator_name)
+        if site_name:
+            site_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_SITE, site_name)
+            if site_id >= 0:
+                return site_id
+
+        transmission_site_id = int(self.model.actuator_trnid[actuator_id, 0])
+        if 0 <= transmission_site_id < int(self.model.nsite):
+            return transmission_site_id
+
+        return -1
+
+    def _build_flight_actuator_wrench_matrix(self) -> np.ndarray:
+        if not self._has_named_flight_actuators:
+            return np.zeros((4, 0), dtype=float)
+
+        matrix = np.zeros((4, len(self._flight_actuator_ids)), dtype=float)
+        for column, actuator_id in enumerate(self._flight_actuator_ids):
+            actuator_name = mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_ACTUATOR, actuator_id)
+            if not actuator_name:
+                continue
+
+            site_id = self._actuator_site_id(actuator_name, actuator_id)
+            if site_id < 0:
+                continue
+
+            position_body = np.array(self.model.site_pos[site_id], dtype=float)
+            gear = np.array(self.model.actuator_gear[actuator_id], dtype=float)
+            force_body = gear[:3]
+            torque_body = np.cross(position_body, force_body) + gear[3:6]
+            matrix[:, column] = np.array(
+                [
+                    force_body[2],
+                    torque_body[0],
+                    torque_body[1],
+                    torque_body[2],
+                ],
+                dtype=float,
+            )
+
+        return matrix
+
+    def flight_actuator_wrench_matrix(self) -> np.ndarray:
+        return np.array(self._flight_actuator_wrench_matrix, dtype=float)
+
+    def flight_actuator_ctrl_limits(self) -> tuple[np.ndarray, np.ndarray]:
+        if not self._flight_actuator_ids:
+            return np.zeros(0, dtype=float), np.zeros(0, dtype=float)
+
+        ctrl_min = np.array(
+            [self.model.actuator_ctrlrange[actuator_id, 0] for actuator_id in self._flight_actuator_ids],
+            dtype=float,
+        )
+        ctrl_max = np.array(
+            [self.model.actuator_ctrlrange[actuator_id, 1] for actuator_id in self._flight_actuator_ids],
+            dtype=float,
+        )
+        return ctrl_min, ctrl_max
+
+    def write_direct_flight_controls(self, controls: np.ndarray) -> None:
+        if not self._has_named_flight_actuators:
+            return
+
+        self._reset_ctrl_for_px4()
+        ctrl_values = sanitize_vector(controls, len(self._flight_actuator_ids))
+        for control_value, actuator_id in zip(ctrl_values, self._flight_actuator_ids):
+            ctrl_min = float(self.model.actuator_ctrlrange[actuator_id, 0])
+            ctrl_max = float(self.model.actuator_ctrlrange[actuator_id, 1])
+            self.data.ctrl[actuator_id] = float(np.clip(control_value, ctrl_min, ctrl_max))
+
     def write_controls(self, controls: np.ndarray, armed: bool, hover_thrust: float) -> None:
         actuator_count = int(self.model.nu)
         if actuator_count == 0:
@@ -277,9 +391,15 @@ class MuJoCoSim:
         return self.data.sensordata[self._sensor_cache[name]]
 
     def imu_frd(self) -> tuple[np.ndarray, np.ndarray]:
-        gyro = flu_to_frd(np.array(self._sensor_slice("body_gyro"), dtype=float))
-        accel = flu_to_frd(np.array(self._sensor_slice("body_linacc"), dtype=float))
-        return gyro, accel
+        gyro_flu = np.array(self._sensor_slice("body_gyro"), dtype=float)
+        accel_world = np.array(self.data.qacc[0:3], dtype=float)
+        rotation_world_from_body_flu = quat_wxyz_to_rotmat(
+            sanitize_quaternion(np.array(self.data.qpos[3:7], dtype=float))
+        )
+        rotation_body_flu_from_world = rotation_world_from_body_flu.T
+        # PX4 expects body-frame specific force, not gravity-free linear acceleration.
+        specific_force_body_flu = rotation_body_flu_from_world @ (accel_world - GRAVITY_WORLD)
+        return flu_to_frd(gyro_flu), flu_to_frd(specific_force_body_flu)
 
     def mag_frd(self) -> np.ndarray:
         try:
@@ -294,18 +414,124 @@ class MuJoCoSim:
         angular_velocity_frd = flu_to_frd(np.array(self.data.qvel[3:6], dtype=float))
         return position_ned, velocity_ned, quat_frd_to_ned, angular_velocity_frd
 
+    def state_world(self) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+        position_world = np.array(self.data.qpos[0:3], dtype=float)
+        velocity_world = np.array(self.data.qvel[0:3], dtype=float)
+        quat_world_from_body = sanitize_quaternion(np.array(self.data.qpos[3:7], dtype=float))
+        angular_velocity_body = np.array(self.data.qvel[3:6], dtype=float)
+        return position_world, velocity_world, quat_world_from_body, angular_velocity_body
+
+
+class LocalHoverController:
+    """Simple onboard-free MuJoCo hover controller for visual takeoff demos."""
+
+    def __init__(self, sim: MuJoCoSim, target_z: float, ramp_seconds: float) -> None:
+        self._target_xy = np.array(sim.data.qpos[0:2], dtype=float)
+        self._initial_z = float(sim.data.qpos[2])
+        self._target_z = max(float(target_z), self._initial_z + 0.2)
+        self._ramp_seconds = max(float(ramp_seconds), 0.5)
+        self._mass = float(np.sum(sim.model.body_mass[1:]))
+        self._gravity = float(np.linalg.norm(np.array(sim.model.opt.gravity, dtype=float)))
+        self._wrench_matrix = sim.flight_actuator_wrench_matrix()
+        self._ctrl_min, self._ctrl_max = sim.flight_actuator_ctrl_limits()
+
+        if self._wrench_matrix.shape != (4, 4):
+            raise RuntimeError("本地悬停模式要求 4 个已命名飞行电机。")
+
+        if self._ctrl_min.shape[0] != 4 or self._ctrl_max.shape[0] != 4:
+            raise RuntimeError("本地悬停模式未能读取电机控制范围。")
+
+    def _target_position(self, sim_time: float) -> np.ndarray:
+        alpha = float(np.clip(sim_time / self._ramp_seconds, 0.0, 1.0))
+        z = self._initial_z + alpha * (self._target_z - self._initial_z)
+        return np.array([self._target_xy[0], self._target_xy[1], z], dtype=float)
+
+    def compute_controls(
+        self,
+        position_world: np.ndarray,
+        velocity_world: np.ndarray,
+        quat_world_from_body: np.ndarray,
+        angular_velocity_body: np.ndarray,
+        sim_time: float,
+    ) -> np.ndarray:
+        target_position = self._target_position(sim_time)
+        position_error = target_position - sanitize_vector(position_world, 3)
+        velocity_error = -sanitize_vector(velocity_world, 3)
+
+        kp_pos = np.array([1.4, 1.4, 2.8], dtype=float)
+        kd_vel = np.array([1.6, 1.6, 2.0], dtype=float)
+        desired_accel_world = kp_pos * position_error + kd_vel * velocity_error
+        desired_accel_world[0:2] = np.clip(desired_accel_world[0:2], -2.0, 2.0)
+        desired_accel_world[2] = float(np.clip(desired_accel_world[2], -2.0, 4.0))
+        desired_force_world = self._mass * (desired_accel_world + np.array([0.0, 0.0, self._gravity], dtype=float))
+
+        force_norm = float(np.linalg.norm(desired_force_world))
+        if force_norm < 1e-6:
+            desired_force_world = np.array([0.0, 0.0, self._mass * self._gravity], dtype=float)
+            force_norm = float(np.linalg.norm(desired_force_world))
+
+        desired_body_z_world = desired_force_world / force_norm
+        desired_yaw = 0.0
+        desired_heading_world = np.array([math.cos(desired_yaw), math.sin(desired_yaw), 0.0], dtype=float)
+        desired_body_y_world = np.cross(desired_body_z_world, desired_heading_world)
+        if np.linalg.norm(desired_body_y_world) < 1e-6:
+            desired_body_y_world = np.array([0.0, 1.0, 0.0], dtype=float)
+        desired_body_y_world /= np.linalg.norm(desired_body_y_world)
+        desired_body_x_world = np.cross(desired_body_y_world, desired_body_z_world)
+        desired_body_x_world /= max(float(np.linalg.norm(desired_body_x_world)), 1e-6)
+        desired_rotation = np.column_stack((desired_body_x_world, desired_body_y_world, desired_body_z_world))
+
+        current_rotation = quat_wxyz_to_rotmat(sanitize_quaternion(quat_world_from_body))
+        rotation_error_matrix = 0.5 * (desired_rotation.T @ current_rotation - current_rotation.T @ desired_rotation)
+        rotation_error = np.array(
+            [
+                rotation_error_matrix[2, 1],
+                rotation_error_matrix[0, 2],
+                rotation_error_matrix[1, 0],
+            ],
+            dtype=float,
+        )
+        angular_velocity = sanitize_vector(angular_velocity_body, 3)
+        k_rot = np.array([7.0, 7.0, 2.5], dtype=float)
+        k_rate = np.array([2.4, 2.4, 0.9], dtype=float)
+        desired_torque_body = -k_rot * rotation_error - k_rate * angular_velocity
+
+        total_thrust = float(np.dot(desired_force_world, current_rotation[:, 2]))
+        total_thrust = max(total_thrust, 0.0)
+        desired_wrench = np.array(
+            [
+                total_thrust,
+                desired_torque_body[0],
+                desired_torque_body[1],
+                desired_torque_body[2],
+            ],
+            dtype=float,
+        )
+
+        controls, *_ = np.linalg.lstsq(self._wrench_matrix, desired_wrench, rcond=None)
+        controls = np.clip(controls, self._ctrl_min, self._ctrl_max)
+        return controls
+
 
 class Px4MavlinkIo:
     """Encapsulates the MAVLink-side IO contract with PX4 SITL."""
 
-    def __init__(self, host: str, port: int, enabled: bool) -> None:
+    def __init__(self, host: str, port: int, actuator_port: Optional[int], enabled: bool) -> None:
         self.enabled = enabled and mavutil is not None
         self.host = host
         self.port = port
+        self.actuator_port = actuator_port
         self.master = None
+        self.actuator_master = None
         self.armed = False
         self._last_heartbeat = 0.0
         self._received_first_actuator = False
+        self._was_connected = False
+        self.last_actuator_controls: Optional[np.ndarray] = None
+        self._pending_actuator_controls: Optional[np.ndarray] = None
+        self._reader_lock = threading.Lock()
+        self._reader_stop = threading.Event()
+        self._reader_thread: Optional[threading.Thread] = None
 
     def connect(self) -> None:
         if not self.enabled:
@@ -314,6 +540,89 @@ class Px4MavlinkIo:
         self.master = mavutil.mavlink_connection(endpoint, source_system=1, source_component=200)
         print(f"Listening for PX4 on {endpoint}")
 
+        if self.actuator_port is not None:
+            actuator_endpoint = f"udpin:0.0.0.0:{self.actuator_port}"
+            self.actuator_master = mavutil.mavlink_connection(
+                actuator_endpoint,
+                source_system=1,
+                source_component=201,
+            )
+            print(f"Listening for PX4 actuator MAVLink on {actuator_endpoint}")
+
+        self._start_reader_thread()
+
+    def close(self) -> None:
+        self._reader_stop.set()
+        if self._reader_thread is not None and self._reader_thread.is_alive():
+            self._reader_thread.join(timeout=1.0)
+
+    def _start_reader_thread(self) -> None:
+        if self.master is None or self._reader_thread is not None:
+            return
+
+        self._reader_thread = threading.Thread(
+            target=self._reader_loop,
+            name="px4-mavlink-reader",
+            daemon=True,
+        )
+        self._reader_thread.start()
+
+    def _reader_loop(self) -> None:
+        reader = self.actuator_master if self.actuator_master is not None else self.master
+
+        while not self._reader_stop.is_set():
+            try:
+                if reader is None:
+                    time.sleep(0.05)
+                    continue
+                msg = reader.recv_match(blocking=True, timeout=0.1)
+            except Exception:
+                continue
+
+            if msg is None:
+                continue
+
+            msg_type = msg.get_type()
+            if msg_type == "HEARTBEAT":
+                self._last_heartbeat = time.time()
+                continue
+
+            if msg_type == "HIL_ACTUATOR_CONTROLS":
+                controls = np.array(msg.controls, dtype=float)
+                armed = bool(msg.mode & mavutil.mavlink.MAV_MODE_FLAG_SAFETY_ARMED)
+                with self._reader_lock:
+                    self.armed = armed
+                    self._received_first_actuator = True
+                    self.last_actuator_controls = controls
+                    self._pending_actuator_controls = controls
+
+    def connected(self) -> bool:
+        return bool(self.enabled and self.master is not None and getattr(self.master, "port", None) is not None)
+
+    def service_connection(self) -> None:
+        """Drive pymavlink's lazy tcpin accept path even before sensor IO starts."""
+
+        if not self.enabled or self.master is None:
+            return
+
+        if getattr(self.master, "port", None) is not None:
+            return
+
+        try:
+            # mavtcpin only accepts an inbound TCP connection when recv() is touched.
+            # Poll it explicitly so the bridge can acknowledge PX4 quickly even if the
+            # simulation is paused or has not yet reached the actuator polling phase.
+            self.master.recv(1)
+        except Exception:
+            return
+
+    def connection_state_changed(self) -> Optional[bool]:
+        connected = self.connected()
+        if connected == self._was_connected:
+            return None
+        self._was_connected = connected
+        return connected
+
     def poll_actuator_controls(self, wait: bool) -> Optional[np.ndarray]:
         if not self.enabled or self.master is None:
             return None
@@ -321,21 +630,16 @@ class Px4MavlinkIo:
         deadline = time.monotonic() + 0.02 if wait else time.monotonic()
 
         while True:
-            timeout = max(0.0, deadline - time.monotonic()) if wait else 0.0
-            if wait and timeout <= 0.0:
+            with self._reader_lock:
+                if self._pending_actuator_controls is not None:
+                    controls = np.array(self._pending_actuator_controls, dtype=float)
+                    self._pending_actuator_controls = None
+                    return controls
+
+            if not wait or time.monotonic() >= deadline:
                 return None
 
-            msg = self.master.recv_match(blocking=wait, timeout=timeout)
-            if msg is None:
-                return None
-
-            msg_type = msg.get_type()
-            if msg_type == "HEARTBEAT":
-                self._last_heartbeat = time.time()
-            elif msg_type == "HIL_ACTUATOR_CONTROLS":
-                self.armed = bool(msg.mode & mavutil.mavlink.MAV_MODE_FLAG_SAFETY_ARMED)
-                self._received_first_actuator = True
-                return np.array(msg.controls, dtype=float)
+            time.sleep(0.001)
 
     def send_heartbeat(self) -> None:
         if not self.enabled or self.master is None:
@@ -434,20 +738,19 @@ class Px4MavlinkIo:
         velocity_world = sanitize_vector(velocity_ned, 3)
         orientation = sanitize_quaternion(quat_frd_to_ned)
         angular_velocity = sanitize_vector(angular_velocity_frd, 3)
-        velocity_body_frd = sanitize_vector(rotate_vector_by_quat_conjugate(orientation, velocity_world), 3)
         pose_cov = sanitize_covariance([1e-4] * 21)
         vel_cov = sanitize_covariance([1e-4] * 21)
         self.master.mav.odometry_send(
             clamp_uint64(timestamp_us),
             clamp_uint8(mavutil.mavlink.MAV_FRAME_LOCAL_NED),
-            clamp_uint8(mavutil.mavlink.MAV_FRAME_BODY_FRD),
+            clamp_uint8(mavutil.mavlink.MAV_FRAME_LOCAL_NED),
             sanitize_float(position[0]),
             sanitize_float(position[1]),
             sanitize_float(position[2]),
             orientation.tolist(),
-            sanitize_float(velocity_body_frd[0]),
-            sanitize_float(velocity_body_frd[1]),
-            sanitize_float(velocity_body_frd[2]),
+            sanitize_float(velocity_world[0]),
+            sanitize_float(velocity_world[1]),
+            sanitize_float(velocity_world[2]),
             sanitize_float(angular_velocity[0]),
             sanitize_float(angular_velocity[1]),
             sanitize_float(angular_velocity[2]),
@@ -457,6 +760,63 @@ class Px4MavlinkIo:
             clamp_uint8(mavutil.mavlink.MAV_ESTIMATOR_TYPE_VISION),
             clamp_uint8(100),
         )
+
+
+class VisualOdometryRosPublisher:
+    """Publish PX4 visual odometry directly over ROS 2 when requested."""
+
+    def __init__(self) -> None:
+        if rclpy is None or RosNode is None or RosVehicleOdometry is None:
+            raise RuntimeError(
+                "ROS 2 visual odometry mode requested, but rclpy/px4_msgs is unavailable. "
+                "Please source ROS 2 before running the bridge."
+            )
+
+        rclpy.init(args=None)
+        self._node = RosNode("mujoco_visual_odometry_bridge")
+        qos = RosQoSProfile(
+            reliability=RosReliabilityPolicy.BEST_EFFORT,
+            durability=RosDurabilityPolicy.VOLATILE,
+            history=RosHistoryPolicy.KEEP_LAST,
+            depth=1,
+        )
+        self._publisher = self._node.create_publisher(
+            RosVehicleOdometry,
+            "/fmu/in/vehicle_visual_odometry",
+            qos,
+        )
+
+    def publish(
+        self,
+        timestamp_us: int,
+        position_ned: np.ndarray,
+        velocity_ned: np.ndarray,
+        quat_frd_to_ned: np.ndarray,
+        angular_velocity_frd: np.ndarray,
+    ) -> None:
+        msg = RosVehicleOdometry()
+        msg.timestamp = clamp_uint64(timestamp_us)
+        msg.timestamp_sample = clamp_uint64(timestamp_us)
+        msg.pose_frame = RosVehicleOdometry.POSE_FRAME_NED
+        msg.position = sanitize_vector(position_ned, 3).tolist()
+        msg.q = sanitize_quaternion(quat_frd_to_ned).tolist()
+        msg.velocity_frame = RosVehicleOdometry.VELOCITY_FRAME_NED
+        msg.velocity = sanitize_vector(velocity_ned, 3).tolist()
+        msg.angular_velocity = sanitize_vector(angular_velocity_frd, 3).tolist()
+        msg.position_variance = [1e-4, 1e-4, 1e-4]
+        msg.orientation_variance = [1e-4, 1e-4, 1e-4]
+        msg.velocity_variance = [1e-4, 1e-4, 1e-4]
+        msg.quality = 100
+        self._publisher.publish(msg)
+        rclpy.spin_once(self._node, timeout_sec=0.0)
+
+    def close(self) -> None:
+        if rclpy is None:
+            return
+
+        self._node.destroy_node()
+        if rclpy.ok():
+            rclpy.shutdown()
 
 
 def rotate_vector_by_quat_conjugate(quat_wxyz: np.ndarray, vector: np.ndarray) -> np.ndarray:
@@ -596,6 +956,15 @@ def sanitize_covariance(values: np.ndarray | list[float], default: float = 1e-4)
     return [sanitize_float(v, default=default, min_value=0.0) for v in covariance]
 
 
+def add_sensor_noise(rng: np.random.Generator, values: np.ndarray, stddev: float) -> np.ndarray:
+    """Add small deterministic simulation noise so PX4 does not flag perfectly static sensors as stale."""
+
+    if stddev <= 0.0:
+        return np.array(values, dtype=float)
+
+    return np.array(values, dtype=float) + rng.normal(0.0, stddev, size=np.shape(values))
+
+
 def pace_realtime(start_wall_time: float, start_sim_time: float, current_sim_time: float, real_time_factor: float) -> None:
     """Throttle simulation so MuJoCo time advances at a chosen real-time factor."""
 
@@ -608,6 +977,23 @@ def pace_realtime(start_wall_time: float, start_sim_time: float, current_sim_tim
         time.sleep(sleep_duration)
 
 
+def presettle_simulation(sim: MuJoCoSim, duration_seconds: float) -> None:
+    """Let the free-body model settle onto contact surfaces before PX4 starts sampling it."""
+
+    if duration_seconds <= 0.0:
+        return
+
+    target_time = float(sim.data.time) + duration_seconds
+    while float(sim.data.time) < target_time:
+        sim.zero_ctrl()
+        sim.step()
+
+    # Remove residual drop energy so PX4 sees a quiet vehicle when it starts
+    # its first IMU/EV alignment pass.
+    sim.data.qvel[:] = 0.0
+    mujoco.mj_forward(sim.model, sim.data)
+
+
 def run(config: BridgeConfig) -> None:
     """Run the Python PX4-MuJoCo bridge until the viewer closes or steps are exhausted."""
 
@@ -615,43 +1001,157 @@ def run(config: BridgeConfig) -> None:
     if not config.headless:
         sim.launch_viewer()
 
-    io = Px4MavlinkIo(config.mavlink_host, config.mavlink_port, not config.no_mavlink)
+    io = Px4MavlinkIo(
+        config.mavlink_host,
+        config.mavlink_port,
+        config.actuator_mavlink_port,
+        not config.no_mavlink,
+    )
     if io.enabled:
         sim.validate_px4_hil_model_contract()
-    io.connect()
     mujoco.mj_forward(sim.model, sim.data)
+    presettle_simulation(sim, PRESETTLE_DURATION_SECONDS)
+    settled_qpos = np.array(sim.data.qpos, dtype=float)
+    io.connect()
+    local_hover_controller = None
+    visual_odometry_ros_publisher = None
+    if config.local_hover:
+        local_hover_controller = LocalHoverController(
+            sim,
+            target_z=config.local_hover_target_z,
+            ramp_seconds=config.local_hover_ramp_seconds,
+        )
+        print(
+            "Local hover enabled: "
+            f"take off from z={float(sim.data.qpos[2]):.2f} m to z={config.local_hover_target_z:.2f} m",
+            flush=True,
+        )
+    if config.publish_visual_odometry_ros2:
+        visual_odometry_ros_publisher = VisualOdometryRosPublisher()
+        print("ROS 2 visual odometry publishing enabled on /fmu/in/vehicle_visual_odometry", flush=True)
+    if config.ready_file is not None:
+        config.ready_file.parent.mkdir(parents=True, exist_ok=True)
+        config.ready_file.write_text("ready\n", encoding="utf-8")
+    if config.connected_file is not None:
+        config.connected_file.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            config.connected_file.unlink()
+        except FileNotFoundError:
+            pass
     start_wall_time = time.monotonic()
     start_sim_time = float(sim.data.time)
+    rng = np.random.default_rng(7)
+    wall_time_origin_us = time.monotonic_ns() // 1000
+    last_debug_controls_log_time = -1.0
+    px4_alignment_hold_started_at: float | None = None
 
     step_count = 0
     try:
         while sim.viewer_running():
+            if io.enabled:
+                io.service_connection()
+                connection_changed = io.connection_state_changed()
+                if connection_changed is True:
+                    print(f"PX4 connected on tcp:{config.mavlink_host}:{config.mavlink_port}", flush=True)
+                    px4_alignment_hold_started_at = time.monotonic()
+                    if config.connected_file is not None:
+                        config.connected_file.write_text("connected\n", encoding="utf-8")
+                elif connection_changed is False:
+                    print(f"PX4 disconnected from tcp:{config.mavlink_host}:{config.mavlink_port}", flush=True)
+                    px4_alignment_hold_started_at = None
+                    if config.connected_file is not None:
+                        try:
+                            config.connected_file.unlink()
+                        except FileNotFoundError:
+                            pass
+
             if not sim.should_step():
                 sim.refresh_paused_state()
                 sim.sync_viewer()
                 time.sleep(0.01)
                 continue
 
-            timestamp_us = int(sim.data.time * 1e6)
+            in_px4_alignment_hold = (
+                px4_alignment_hold_started_at is not None
+                and (time.monotonic() - px4_alignment_hold_started_at) < PX4_ALIGNMENT_HOLD_SECONDS
+            )
+
+            if in_px4_alignment_hold:
+                sim.data.qpos[:] = settled_qpos
+                sim.data.qvel[:] = 0.0
+                sim.zero_ctrl()
+                mujoco.mj_forward(sim.model, sim.data)
+
+            elapsed_wall_time = time.monotonic() - start_wall_time
+            timestamp_us = int(wall_time_origin_us + elapsed_wall_time * 1e6)
+            position_world, velocity_world, quat_world_from_body, angular_velocity_body = sim.state_world()
             position_ned, velocity_ned, quat_frd_to_ned, angular_velocity_frd = sim.state_ned()
             if io.enabled:
                 gyro_frd, accel_frd = sim.imu_frd()
-                mag_frd = sim.mag_frd()
+                gyro_frd = add_sensor_noise(rng, gyro_frd, GYRO_NOISE_STDDEV)
+                accel_frd = add_sensor_noise(rng, accel_frd, ACCEL_NOISE_STDDEV)
+                mag_frd = add_sensor_noise(rng, sim.mag_frd(), MAG_NOISE_STDDEV)
                 pressure_hpa = pressure_hpa_from_altitude(HOME_ALT_M - position_ned[2])
-                pressure_alt_m = float(HOME_ALT_M - position_ned[2])
+                pressure_hpa = sanitize_float(pressure_hpa + float(rng.normal(0.0, BARO_PRESSURE_NOISE_STDDEV)), min_value=0.0)
+                pressure_alt_m = float(HOME_ALT_M - position_ned[2] + rng.normal(0.0, BARO_ALT_NOISE_STDDEV))
+                temperature_c = float(20.0 + rng.normal(0.0, BARO_TEMP_NOISE_STDDEV))
 
                 io.send_heartbeat()
-                io.send_hil_sensor(timestamp_us, accel_frd, gyro_frd, mag_frd, pressure_hpa, pressure_alt_m)
-                io.send_hil_gps(timestamp_us, position_ned, velocity_ned)
-                io.send_visual_odometry(timestamp_us, position_ned, velocity_ned, quat_frd_to_ned, angular_velocity_frd)
+                io.send_hil_sensor(timestamp_us, accel_frd, gyro_frd, mag_frd, pressure_hpa, pressure_alt_m, temperature_c)
+                if config.send_hil_gps:
+                    io.send_hil_gps(timestamp_us, position_ned, velocity_ned)
+                if visual_odometry_ros_publisher is None:
+                    io.send_visual_odometry(timestamp_us, position_ned, velocity_ned, quat_frd_to_ned, angular_velocity_frd)
 
-            controls = io.poll_actuator_controls(wait=io._received_first_actuator)
-            if controls is not None:
-                sim.write_controls(controls, io.armed, config.px4_hover_thrust)
-            elif config.no_mavlink or not io.enabled:
+            if visual_odometry_ros_publisher is not None:
+                visual_odometry_ros_publisher.publish(
+                    timestamp_us,
+                    position_ned,
+                    velocity_ned,
+                    quat_frd_to_ned,
+                    angular_velocity_frd,
+                )
+
+            if in_px4_alignment_hold:
+                sim.zero_ctrl()
+            elif local_hover_controller is not None:
+                sim.write_direct_flight_controls(
+                    local_hover_controller.compute_controls(
+                        position_world,
+                        velocity_world,
+                        quat_world_from_body,
+                        angular_velocity_body,
+                        float(sim.data.time),
+                    )
+                )
+            else:
+                controls = io.poll_actuator_controls(wait=io._received_first_actuator)
+                if controls is not None:
+                    sim.write_controls(controls, io.armed, config.px4_hover_thrust)
+                elif config.no_mavlink or not io.enabled:
+                    sim.zero_ctrl()
+            if local_hover_controller is None and (config.no_mavlink or not io.enabled):
                 sim.zero_ctrl()
 
-            sim.step()
+            if config.debug_controls and float(sim.data.time) - last_debug_controls_log_time >= 1.0:
+                last_debug_controls_log_time = float(sim.data.time)
+                mav_controls = None
+                if io.last_actuator_controls is not None:
+                    mav_controls = np.array(io.last_actuator_controls[:4], dtype=float).tolist()
+                ctrl_snapshot = np.array(sim.data.ctrl[: min(4, int(sim.model.nu))], dtype=float).tolist()
+                print(
+                    "bridge-debug "
+                    f"t={float(sim.data.time):.2f}s "
+                    f"armed={int(io.armed)} "
+                    f"qpos_z={float(sim.data.qpos[2]):.3f} "
+                    f"qvel_z={float(sim.data.qvel[2]):.3f} "
+                    f"mav_controls={mav_controls} "
+                    f"ctrl={ctrl_snapshot}",
+                    flush=True,
+                )
+
+            if not in_px4_alignment_hold:
+                sim.step()
             pace_realtime(start_wall_time, start_sim_time, float(sim.data.time), config.real_time_factor)
 
             sim.sync_viewer()
@@ -659,7 +1159,20 @@ def run(config: BridgeConfig) -> None:
             if config.steps is not None and step_count >= config.steps:
                 break
     finally:
+        io.close()
+        if visual_odometry_ros_publisher is not None:
+            visual_odometry_ros_publisher.close()
         sim.close()
+        if config.ready_file is not None:
+            try:
+                config.ready_file.unlink()
+            except FileNotFoundError:
+                pass
+        if config.connected_file is not None:
+            try:
+                config.connected_file.unlink()
+            except FileNotFoundError:
+                pass
 
 
 def parse_args() -> BridgeConfig:
@@ -669,11 +1182,23 @@ def parse_args() -> BridgeConfig:
     parser.add_argument("--model", type=Path, default=DEFAULT_MODEL)
     parser.add_argument("--mavlink-host", default="0.0.0.0")
     parser.add_argument("--mavlink-port", type=int, default=4560)
+    parser.add_argument("--actuator-mavlink-port", type=int, default=None)
     parser.add_argument("--no-mavlink", action="store_true")
     parser.add_argument("--headless", action="store_true")
     parser.add_argument("--steps", type=int, default=None)
     parser.add_argument("--px4-hover-thrust", type=float, default=0.60)
     parser.add_argument("--real-time-factor", type=float, default=1.0)
+    parser.add_argument("--send-hil-gps", action="store_true")
+    local_hover_group = parser.add_mutually_exclusive_group()
+    local_hover_group.add_argument("--local-hover", dest="local_hover", action="store_true")
+    local_hover_group.add_argument("--no-local-hover", dest="local_hover", action="store_false")
+    parser.set_defaults(local_hover=False)
+    parser.add_argument("--local-hover-target-z", type=float, default=2.0)
+    parser.add_argument("--local-hover-ramp-seconds", type=float, default=3.0)
+    parser.add_argument("--publish-visual-odometry-ros2", action="store_true")
+    parser.add_argument("--ready-file", type=Path, default=None)
+    parser.add_argument("--connected-file", type=Path, default=None)
+    parser.add_argument("--debug-controls", action="store_true")
     args = parser.parse_args()
     model_path = args.model.expanduser()
     if not model_path.is_absolute():
@@ -682,11 +1207,20 @@ def parse_args() -> BridgeConfig:
         model=model_path,
         mavlink_host=args.mavlink_host,
         mavlink_port=args.mavlink_port,
+        actuator_mavlink_port=args.actuator_mavlink_port,
         no_mavlink=args.no_mavlink or mavutil is None,
         headless=args.headless,
         steps=args.steps,
         px4_hover_thrust=args.px4_hover_thrust,
         real_time_factor=args.real_time_factor,
+        send_hil_gps=args.send_hil_gps,
+        local_hover=args.local_hover,
+        local_hover_target_z=args.local_hover_target_z,
+        local_hover_ramp_seconds=args.local_hover_ramp_seconds,
+        publish_visual_odometry_ros2=args.publish_visual_odometry_ros2,
+        ready_file=args.ready_file,
+        connected_file=args.connected_file,
+        debug_controls=args.debug_controls,
     )
 
 

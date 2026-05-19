@@ -38,6 +38,11 @@ cleanup() {
 
 trap cleanup EXIT INT TERM
 
+if px4_running; then
+  echo "[stack] stopping existing PX4 SITL instance"
+  "${REPO_ROOT}/scripts/stop_px4.sh"
+fi
+
 if [[ "${START_QGC}" -eq 1 ]]; then
   if [[ -n "${PX4_MUJOCO_QGC_APP_ABS}" && -f "${PX4_MUJOCO_QGC_APP_ABS}" ]]; then
     echo "[stack] starting QGroundControl"
@@ -50,14 +55,27 @@ if [[ "${START_QGC}" -eq 1 ]]; then
 fi
 
 echo "[stack] starting Python MuJoCo bridge"
-"${REPO_ROOT}/scripts/run_bridge.sh" &
+rm -f "${PX4_MUJOCO_BRIDGE_READY_FILE}"
+rm -f "${PX4_MUJOCO_BRIDGE_CONNECTED_FILE}"
+"${REPO_ROOT}/scripts/run_bridge.sh" --no-local-hover &
 bridge_pid=$!
 
-echo "[stack] waiting for bridge tcp port ${PX4_MUJOCO_TCP_PORT}"
-if ! wait_for_tcp_port "127.0.0.1" "${PX4_MUJOCO_TCP_PORT}" 30; then
-  echo "Error: bridge did not start listening on tcp port ${PX4_MUJOCO_TCP_PORT}" >&2
+echo "[stack] waiting for bridge listener"
+bridge_ready_file="${PX4_MUJOCO_BRIDGE_READY_FILE}"
+if ! wait_for_file "${bridge_ready_file}" 30; then
+  echo "Error: bridge did not enter listening state: ${bridge_ready_file}" >&2
   exit 1
 fi
 
 echo "[stack] starting PX4 SITL"
-"${REPO_ROOT}/scripts/run_px4.sh"
+"${REPO_ROOT}/scripts/run_px4.sh" &
+px4_pid=$!
+
+echo "[stack] waiting for PX4 to connect to bridge"
+bridge_connected_file="${PX4_MUJOCO_BRIDGE_CONNECTED_FILE}"
+if ! wait_for_file "${bridge_connected_file}" 30; then
+  echo "Error: PX4 did not connect to bridge within 30s: ${bridge_connected_file}" >&2
+  exit 1
+fi
+
+wait "${px4_pid}"

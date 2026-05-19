@@ -1,6 +1,6 @@
 ﻿<mujoco model="UAV">
   <compiler angle="degree" coordinate="local" meshdir="UAV" inertiafromgeom="auto"/>
-  <option timestep="0.002" gravity="0 0 -9.81"/>
+  <option timestep="0.001" gravity="0 0 -9.81"/>
 
   <asset>
     <material name="uav_mat" rgba="0.75 0.75 0.78 1" specular="0.3" shininess="0.2"/>
@@ -97,7 +97,7 @@
   </default>
 
   <worldbody>
-    <body name="uav" pos="0 0 0.25">
+    <body name="uav" pos="0 0 0.75">
       <freejoint/>
       <site name="imu" pos="0 0 0" size="0.005" rgba="0.2 0.8 1 1"/>
       <!-- PX4 Quad X rotor order: 1=front-left, 2=back-right, 3=front-right, 4=back-left -->
@@ -332,8 +332,6 @@
   </actuator>
 
   <keyframe>
-    <key name="hover" qpos="0 0 0.25 1 0 0 0" ctrl="4.12 4.12 4.12 4.12"/>
+    <key name="hover" qpos="0 0 0.75 1 0 0 0" ctrl="4.12 4.12 4.12 4.12"/>
   </keyframe>
 </mujoco>
-
-

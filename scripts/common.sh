@@ -18,12 +18,54 @@ resolve_repo_path() {
 }
 
 load_project_env() {
+  local -A env_overrides=()
+  local env_override_names=(
+    PX4_MUJOCO_PYTHON
+    PX4_MUJOCO_CONDA_ENV
+    PX4_MUJOCO_MODEL
+    PX4_MUJOCO_PX4_DIR
+    PX4_MUJOCO_PX4_BRANCH
+    PX4_MUJOCO_PX4_BUILD_DIR
+    PX4_MUJOCO_PX4_AUTOSTART
+    PX4_MUJOCO_PX4_SIM_MODEL
+    PX4_MUJOCO_MAVLINK_HOST
+    PX4_MUJOCO_TCP_PORT
+    PX4_MUJOCO_ACTUATOR_MAVLINK_PORT
+    PX4_MUJOCO_HOVER_THRUST
+    PX4_MUJOCO_LOCAL_HOVER
+    PX4_MUJOCO_LOCAL_HOVER_TARGET_Z
+    PX4_MUJOCO_LOCAL_HOVER_RAMP_SECONDS
+    PX4_MUJOCO_QGC_APP
+    PX4_MUJOCO_QGC_UDP_PORT
+    PX4_MUJOCO_ROS2_SETUP
+    PX4_MUJOCO_ROS2_WS
+    PX4_MUJOCO_ROS_LOG_DIR
+    PX4_MUJOCO_UXRCE_DDS_AGENT
+    PX4_MUJOCO_UXRCE_DDS_PORT
+    PX4_MUJOCO_BRIDGE_READY_FILE
+    PX4_MUJOCO_BRIDGE_CONNECTED_FILE
+    PX4_MUJOCO_BRIDGE_EXTRA_ARGS
+    ROS_LOG_DIR
+  )
+  local name
+
+  for name in "${env_override_names[@]}"; do
+    if [[ -n "${!name+x}" ]]; then
+      env_overrides["${name}"]="${!name}"
+    fi
+  done
+
   if [[ -f "${CONFIG_FILE}" ]]; then
     set -a
     # shellcheck disable=SC1090
     source "${CONFIG_FILE}"
     set +a
   fi
+
+  for name in "${!env_overrides[@]}"; do
+    printf -v "${name}" '%s' "${env_overrides[${name}]}"
+    export "${name}"
+  done
 
   export PX4_MUJOCO_PYTHON="${PX4_MUJOCO_PYTHON:-python3}"
   export PX4_MUJOCO_CONDA_ENV="${PX4_MUJOCO_CONDA_ENV:-px4-mujoco}"
@@ -35,13 +77,31 @@ load_project_env() {
   export PX4_MUJOCO_PX4_SIM_MODEL="${PX4_MUJOCO_PX4_SIM_MODEL:-mujoco_delta}"
   export PX4_MUJOCO_MAVLINK_HOST="${PX4_MUJOCO_MAVLINK_HOST:-0.0.0.0}"
   export PX4_MUJOCO_TCP_PORT="${PX4_MUJOCO_TCP_PORT:-4560}"
+  export PX4_MUJOCO_ACTUATOR_MAVLINK_PORT="${PX4_MUJOCO_ACTUATOR_MAVLINK_PORT:-14581}"
   export PX4_MUJOCO_HOVER_THRUST="${PX4_MUJOCO_HOVER_THRUST:-0.60}"
+  export PX4_MUJOCO_LOCAL_HOVER="${PX4_MUJOCO_LOCAL_HOVER:-1}"
+  export PX4_MUJOCO_LOCAL_HOVER_TARGET_Z="${PX4_MUJOCO_LOCAL_HOVER_TARGET_Z:-2.0}"
+  export PX4_MUJOCO_LOCAL_HOVER_RAMP_SECONDS="${PX4_MUJOCO_LOCAL_HOVER_RAMP_SECONDS:-3.0}"
   export PX4_MUJOCO_QGC_APP="${PX4_MUJOCO_QGC_APP:-}"
   export PX4_MUJOCO_QGC_UDP_PORT="${PX4_MUJOCO_QGC_UDP_PORT:-14550}"
   export PX4_MUJOCO_ROS2_SETUP="${PX4_MUJOCO_ROS2_SETUP:-}"
+  export PX4_MUJOCO_ROS2_WS="${PX4_MUJOCO_ROS2_WS:-ros2_ws}"
+  export PX4_MUJOCO_ROS_LOG_DIR="${PX4_MUJOCO_ROS_LOG_DIR:-/tmp/px4_mujoco_ros2_logs}"
+  local default_uxrce_agent="MicroXRCEAgent"
+  if [[ ! -x "${default_uxrce_agent}" && -x "${HOME}/Micro-XRCE-DDS-Agent/build/MicroXRCEAgent" ]]; then
+    default_uxrce_agent="${HOME}/Micro-XRCE-DDS-Agent/build/MicroXRCEAgent"
+  fi
+  export PX4_MUJOCO_UXRCE_DDS_AGENT="${PX4_MUJOCO_UXRCE_DDS_AGENT:-${default_uxrce_agent}}"
+  export PX4_MUJOCO_UXRCE_DDS_PORT="${PX4_MUJOCO_UXRCE_DDS_PORT:-8888}"
+  export PX4_MUJOCO_BRIDGE_READY_FILE="${PX4_MUJOCO_BRIDGE_READY_FILE:-/tmp/px4_mujoco_bridge_ready}"
+  export PX4_MUJOCO_BRIDGE_CONNECTED_FILE="${PX4_MUJOCO_BRIDGE_CONNECTED_FILE:-/tmp/px4_mujoco_bridge_connected}"
+  export PX4_MUJOCO_BRIDGE_EXTRA_ARGS="${PX4_MUJOCO_BRIDGE_EXTRA_ARGS:-}"
+  export ROS_LOG_DIR="${ROS_LOG_DIR:-${PX4_MUJOCO_ROS_LOG_DIR}}"
+  mkdir -p "${ROS_LOG_DIR}"
 
   export PX4_MUJOCO_MODEL_ABS="$(resolve_repo_path "${PX4_MUJOCO_MODEL}")"
   export PX4_MUJOCO_PX4_DIR_ABS="$(resolve_repo_path "${PX4_MUJOCO_PX4_DIR}")"
+  export PX4_MUJOCO_ROS2_WS_ABS="$(resolve_repo_path "${PX4_MUJOCO_ROS2_WS}")"
 
   if [[ "${PX4_MUJOCO_PX4_BUILD_DIR}" = /* ]]; then
     export PX4_MUJOCO_PX4_BUILD_DIR_ABS="${PX4_MUJOCO_PX4_BUILD_DIR}"
@@ -72,6 +132,11 @@ require_command() {
   fi
 }
 
+command_exists() {
+  local cmd="${1}"
+  command -v "${cmd}" >/dev/null 2>&1
+}
+
 activate_conda_if_configured() {
   if [[ -z "${PX4_MUJOCO_CONDA_ENV:-}" ]]; then
     return 0
@@ -100,6 +165,14 @@ px4_build_ready() {
   [[ -d "${PX4_MUJOCO_PX4_ROOTFS}" ]] || return 1
 }
 
+px4_running() {
+  pgrep -f "${PX4_MUJOCO_PX4_BIN}" >/dev/null 2>&1
+}
+
+ros2_agent_running() {
+  pgrep -f "${PX4_MUJOCO_UXRCE_DDS_AGENT}" >/dev/null 2>&1
+}
+
 wait_for_tcp_port() {
   local host="${1}"
   local port="${2}"
@@ -108,6 +181,21 @@ wait_for_tcp_port() {
 
   while (( SECONDS < deadline )); do
     if (echo >/dev/tcp/"${host}"/"${port}") >/dev/null 2>&1; then
+      return 0
+    fi
+    sleep 1
+  done
+
+  return 1
+}
+
+wait_for_file() {
+  local path="${1}"
+  local timeout_seconds="${2:-20}"
+  local deadline=$((SECONDS + timeout_seconds))
+
+  while (( SECONDS < deadline )); do
+    if [[ -f "${path}" ]]; then
       return 0
     fi
     sleep 1
