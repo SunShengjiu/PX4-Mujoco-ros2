@@ -43,4 +43,4 @@ The bridge currently expects these sensor names:
 ## Scope Notes
 
 - `make run-local` uses the same scene/model assets, but does not depend on PX4.
-- `make run-stack-*` and `make run-stack-ros2-*` depend on this contract for PX4-facing HIL behavior.
+- PX4 stack and ROS 2 Offboard startup flows depend on this contract for PX4-facing HIL behavior.

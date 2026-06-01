@@ -44,14 +44,18 @@ if [[ -d "${PX4_MSGS_PKG_DIR}" && -d "${PX4_MSG_SRC_DIR}" && -d "${PX4_SRV_SRC_D
   cp "${PX4_SRV_SRC_DIR}/"*.srv "${PX4_MSGS_PKG_DIR}/srv/"
 fi
 
-echo "[ros2-build] clearing stale px4_msgs and control-package build artifacts"
+echo "[ros2-build] clearing stale px4_msgs and ROS 2 package build artifacts"
 rm -rf \
   "${PX4_MUJOCO_ROS2_WS_ABS}/build/px4_msgs" \
   "${PX4_MUJOCO_ROS2_WS_ABS}/build/px4_mujoco_ros2_control" \
+  "${PX4_MUJOCO_ROS2_WS_ABS}/build/px4_mujoco_ros2_bringup" \
+  "${PX4_MUJOCO_ROS2_WS_ABS}/build/uav_control" \
   "${PX4_MUJOCO_ROS2_WS_ABS}/install/px4_msgs" \
-  "${PX4_MUJOCO_ROS2_WS_ABS}/install/px4_mujoco_ros2_control"
+  "${PX4_MUJOCO_ROS2_WS_ABS}/install/px4_mujoco_ros2_control" \
+  "${PX4_MUJOCO_ROS2_WS_ABS}/install/px4_mujoco_ros2_bringup" \
+  "${PX4_MUJOCO_ROS2_WS_ABS}/install/uav_control"
 
 colcon build \
   --symlink-install \
-  --packages-select px4_msgs px4_mujoco_ros2_control \
+  --packages-select px4_msgs px4_mujoco_ros2_control px4_mujoco_ros2_bringup uav_control \
   --cmake-force-configure

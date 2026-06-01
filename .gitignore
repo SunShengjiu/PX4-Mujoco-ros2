@@ -4,6 +4,7 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 .codex
+.agents/
 .venv/
 venv/
 .workspace/
@@ -11,6 +12,7 @@ external/
 build/
 dist/
 *.egg-info/
+MUJOCO_LOG.TXT
 ros2_ws/build/
 ros2_ws/install/
 ros2_ws/log/

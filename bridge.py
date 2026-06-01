@@ -117,14 +117,19 @@ class BridgeConfig:
     steps: Optional[int] = None
     px4_hover_thrust: float = 0.60
     real_time_factor: float = 1.0
+    physics_substeps_per_sensor: int = 1
     send_hil_gps: bool = False
     local_hover: bool = False
     local_hover_target_z: float = 2.0
     local_hover_ramp_seconds: float = 3.0
     publish_visual_odometry_ros2: bool = False
+    publish_debug_truth_ros2: bool = False
+    presettle_duration_seconds: float = PRESETTLE_DURATION_SECONDS
+    px4_alignment_hold_seconds: float = PX4_ALIGNMENT_HOLD_SECONDS
     ready_file: Optional[Path] = None
     connected_file: Optional[Path] = None
     debug_controls: bool = False
+    debug_hil_rate: bool = False
 
 
 class MuJoCoSim:
@@ -567,34 +572,66 @@ class Px4MavlinkIo:
         )
         self._reader_thread.start()
 
+    def _handle_timesync_message(self, reader, msg) -> None:
+        if reader is None or not hasattr(reader, "mav"):
+            return
+
+        tc1 = int(getattr(msg, "tc1", 0))
+        ts1 = int(getattr(msg, "ts1", 0))
+
+        if tc1 != 0:
+            return
+
+        try:
+            reader.mav.timesync_send(time.monotonic_ns(), ts1)
+        except Exception:
+            return
+
+    def _handle_incoming_message(self, reader, msg) -> None:
+        msg_type = msg.get_type()
+
+        if msg_type == "HEARTBEAT":
+            self._last_heartbeat = time.time()
+            return
+
+        if msg_type == "TIMESYNC":
+            self._handle_timesync_message(reader, msg)
+            return
+
+        if msg_type == "HIL_ACTUATOR_CONTROLS":
+            controls = np.array(msg.controls, dtype=float)
+            armed = bool(msg.mode & mavutil.mavlink.MAV_MODE_FLAG_SAFETY_ARMED)
+            with self._reader_lock:
+                self.armed = armed
+                self._received_first_actuator = True
+                self.last_actuator_controls = controls
+                self._pending_actuator_controls = controls
+
     def _reader_loop(self) -> None:
-        reader = self.actuator_master if self.actuator_master is not None else self.master
-
         while not self._reader_stop.is_set():
-            try:
+            readers = [self.master]
+            if self.actuator_master is not None and self.actuator_master is not self.master:
+                readers.append(self.actuator_master)
+
+            saw_message = False
+
+            for reader in readers:
                 if reader is None:
-                    time.sleep(0.05)
                     continue
-                msg = reader.recv_match(blocking=True, timeout=0.1)
-            except Exception:
-                continue
 
-            if msg is None:
-                continue
+                try:
+                    msg = reader.recv_match(blocking=False)
+                except Exception:
+                    continue
 
-            msg_type = msg.get_type()
-            if msg_type == "HEARTBEAT":
-                self._last_heartbeat = time.time()
-                continue
+                if msg is None:
+                    continue
 
-            if msg_type == "HIL_ACTUATOR_CONTROLS":
-                controls = np.array(msg.controls, dtype=float)
-                armed = bool(msg.mode & mavutil.mavlink.MAV_MODE_FLAG_SAFETY_ARMED)
-                with self._reader_lock:
-                    self.armed = armed
-                    self._received_first_actuator = True
-                    self.last_actuator_controls = controls
-                    self._pending_actuator_controls = controls
+                saw_message = True
+                self._handle_incoming_message(reader, msg)
+
+            if not saw_message:
+                time.sleep(0.002)
 
     def connected(self) -> bool:
         return bool(self.enabled and self.master is not None and getattr(self.master, "port", None) is not None)
@@ -762,18 +799,20 @@ class Px4MavlinkIo:
         )
 
 
-class VisualOdometryRosPublisher:
-    """Publish PX4 visual odometry directly over ROS 2 when requested."""
+class RosVehicleOdometryPublisher:
+    """Publish NED odometry over ROS 2 using px4_msgs/VehicleOdometry."""
 
-    def __init__(self) -> None:
+    def __init__(self, topic_name: str, node_name: str) -> None:
         if rclpy is None or RosNode is None or RosVehicleOdometry is None:
             raise RuntimeError(
                 "ROS 2 visual odometry mode requested, but rclpy/px4_msgs is unavailable. "
                 "Please source ROS 2 before running the bridge."
             )
 
-        rclpy.init(args=None)
-        self._node = RosNode("mujoco_visual_odometry_bridge")
+        if not rclpy.ok():
+            rclpy.init(args=None)
+
+        self._node = RosNode(node_name)
         qos = RosQoSProfile(
             reliability=RosReliabilityPolicy.BEST_EFFORT,
             durability=RosDurabilityPolicy.VOLATILE,
@@ -782,9 +821,10 @@ class VisualOdometryRosPublisher:
         )
         self._publisher = self._node.create_publisher(
             RosVehicleOdometry,
-            "/fmu/in/vehicle_visual_odometry",
+            topic_name,
             qos,
         )
+        self._closed = False
 
     def publish(
         self,
@@ -794,6 +834,11 @@ class VisualOdometryRosPublisher:
         quat_frd_to_ned: np.ndarray,
         angular_velocity_frd: np.ndarray,
     ) -> None:
+        if self._closed or self._node is None or self._publisher is None:
+            return
+        if rclpy is None or not rclpy.ok():
+            return
+
         msg = RosVehicleOdometry()
         msg.timestamp = clamp_uint64(timestamp_us)
         msg.timestamp_sample = clamp_uint64(timestamp_us)
@@ -807,16 +852,20 @@ class VisualOdometryRosPublisher:
         msg.orientation_variance = [1e-4, 1e-4, 1e-4]
         msg.velocity_variance = [1e-4, 1e-4, 1e-4]
         msg.quality = 100
-        self._publisher.publish(msg)
-        rclpy.spin_once(self._node, timeout_sec=0.0)
+        try:
+            self._publisher.publish(msg)
+            rclpy.spin_once(self._node, timeout_sec=0.0)
+        except Exception:
+            self._closed = True
 
     def close(self) -> None:
-        if rclpy is None:
+        if rclpy is None or self._node is None:
             return
 
+        self._closed = True
         self._node.destroy_node()
-        if rclpy.ok():
-            rclpy.shutdown()
+        self._node = None
+        self._publisher = None
 
 
 def rotate_vector_by_quat_conjugate(quat_wxyz: np.ndarray, vector: np.ndarray) -> np.ndarray:
@@ -1010,11 +1059,12 @@ def run(config: BridgeConfig) -> None:
     if io.enabled:
         sim.validate_px4_hil_model_contract()
     mujoco.mj_forward(sim.model, sim.data)
-    presettle_simulation(sim, PRESETTLE_DURATION_SECONDS)
+    presettle_simulation(sim, config.presettle_duration_seconds)
     settled_qpos = np.array(sim.data.qpos, dtype=float)
     io.connect()
     local_hover_controller = None
     visual_odometry_ros_publisher = None
+    debug_truth_ros_publisher = None
     if config.local_hover:
         local_hover_controller = LocalHoverController(
             sim,
@@ -1027,8 +1077,17 @@ def run(config: BridgeConfig) -> None:
             flush=True,
         )
     if config.publish_visual_odometry_ros2:
-        visual_odometry_ros_publisher = VisualOdometryRosPublisher()
+        visual_odometry_ros_publisher = RosVehicleOdometryPublisher(
+            "/fmu/in/vehicle_visual_odometry",
+            "mujoco_visual_odometry_bridge",
+        )
         print("ROS 2 visual odometry publishing enabled on /fmu/in/vehicle_visual_odometry", flush=True)
+    if config.publish_debug_truth_ros2:
+        debug_truth_ros_publisher = RosVehicleOdometryPublisher(
+            "/px4_mujoco/debug_truth_odometry",
+            "mujoco_debug_truth_bridge",
+        )
+        print("ROS 2 debug truth publishing enabled on /px4_mujoco/debug_truth_odometry", flush=True)
     if config.ready_file is not None:
         config.ready_file.parent.mkdir(parents=True, exist_ok=True)
         config.ready_file.write_text("ready\n", encoding="utf-8")
@@ -1046,6 +1105,11 @@ def run(config: BridgeConfig) -> None:
     px4_alignment_hold_started_at: float | None = None
 
     step_count = 0
+    hil_rate_window_started_at = time.monotonic()
+    hil_rate_last_sim_time = float(sim.data.time)
+    hil_rate_steps = 0
+    hil_rate_sensor_messages = 0
+    hil_rate_actuator_messages = 0
     try:
         while sim.viewer_running():
             if io.enabled:
@@ -1073,7 +1137,7 @@ def run(config: BridgeConfig) -> None:
 
             in_px4_alignment_hold = (
                 px4_alignment_hold_started_at is not None
-                and (time.monotonic() - px4_alignment_hold_started_at) < PX4_ALIGNMENT_HOLD_SECONDS
+                and (time.monotonic() - px4_alignment_hold_started_at) < config.px4_alignment_hold_seconds
             )
 
             if in_px4_alignment_hold:
@@ -1098,6 +1162,7 @@ def run(config: BridgeConfig) -> None:
 
                 io.send_heartbeat()
                 io.send_hil_sensor(timestamp_us, accel_frd, gyro_frd, mag_frd, pressure_hpa, pressure_alt_m, temperature_c)
+                hil_rate_sensor_messages += 1
                 if config.send_hil_gps:
                     io.send_hil_gps(timestamp_us, position_ned, velocity_ned)
                 if visual_odometry_ros_publisher is None:
@@ -1105,6 +1170,14 @@ def run(config: BridgeConfig) -> None:
 
             if visual_odometry_ros_publisher is not None:
                 visual_odometry_ros_publisher.publish(
+                    timestamp_us,
+                    position_ned,
+                    velocity_ned,
+                    quat_frd_to_ned,
+                    angular_velocity_frd,
+                )
+            if debug_truth_ros_publisher is not None:
+                debug_truth_ros_publisher.publish(
                     timestamp_us,
                     position_ned,
                     velocity_ned,
@@ -1127,6 +1200,7 @@ def run(config: BridgeConfig) -> None:
             else:
                 controls = io.poll_actuator_controls(wait=io._received_first_actuator)
                 if controls is not None:
+                    hil_rate_actuator_messages += 1
                     sim.write_controls(controls, io.armed, config.px4_hover_thrust)
                 elif config.no_mavlink or not io.enabled:
                     sim.zero_ctrl()
@@ -1143,7 +1217,11 @@ def run(config: BridgeConfig) -> None:
                     "bridge-debug "
                     f"t={float(sim.data.time):.2f}s "
                     f"armed={int(io.armed)} "
+                    f"qpos_x={float(sim.data.qpos[0]):.3f} "
+                    f"qpos_y={float(sim.data.qpos[1]):.3f} "
                     f"qpos_z={float(sim.data.qpos[2]):.3f} "
+                    f"qvel_x={float(sim.data.qvel[0]):.3f} "
+                    f"qvel_y={float(sim.data.qvel[1]):.3f} "
                     f"qvel_z={float(sim.data.qvel[2]):.3f} "
                     f"mav_controls={mav_controls} "
                     f"ctrl={ctrl_snapshot}",
@@ -1151,8 +1229,31 @@ def run(config: BridgeConfig) -> None:
                 )
 
             if not in_px4_alignment_hold:
-                sim.step()
+                for _ in range(config.physics_substeps_per_sensor):
+                    sim.step()
+                    hil_rate_steps += 1
             pace_realtime(start_wall_time, start_sim_time, float(sim.data.time), config.real_time_factor)
+
+            if config.debug_hil_rate:
+                now_s = time.monotonic()
+                elapsed_s = now_s - hil_rate_window_started_at
+                if elapsed_s >= 1.0:
+                    sim_elapsed_s = float(sim.data.time) - hil_rate_last_sim_time
+                    print(
+                        "bridge-hil-rate "
+                        f"sensor_hz={hil_rate_sensor_messages / elapsed_s:.1f} "
+                        f"step_hz={hil_rate_steps / elapsed_s:.1f} "
+                        f"actuator_hz={hil_rate_actuator_messages / elapsed_s:.1f} "
+                        f"real_time={sim_elapsed_s / elapsed_s:.2f} "
+                        f"connected={int(io.connected())} "
+                        f"armed={int(io.armed)}",
+                        flush=True,
+                    )
+                    hil_rate_window_started_at = now_s
+                    hil_rate_last_sim_time = float(sim.data.time)
+                    hil_rate_steps = 0
+                    hil_rate_sensor_messages = 0
+                    hil_rate_actuator_messages = 0
 
             sim.sync_viewer()
             step_count += 1
@@ -1162,6 +1263,10 @@ def run(config: BridgeConfig) -> None:
         io.close()
         if visual_odometry_ros_publisher is not None:
             visual_odometry_ros_publisher.close()
+        if debug_truth_ros_publisher is not None:
+            debug_truth_ros_publisher.close()
+        if rclpy is not None and rclpy.ok():
+            rclpy.shutdown()
         sim.close()
         if config.ready_file is not None:
             try:
@@ -1188,6 +1293,7 @@ def parse_args() -> BridgeConfig:
     parser.add_argument("--steps", type=int, default=None)
     parser.add_argument("--px4-hover-thrust", type=float, default=0.60)
     parser.add_argument("--real-time-factor", type=float, default=1.0)
+    parser.add_argument("--physics-substeps-per-sensor", type=int, default=1)
     parser.add_argument("--send-hil-gps", action="store_true")
     local_hover_group = parser.add_mutually_exclusive_group()
     local_hover_group.add_argument("--local-hover", dest="local_hover", action="store_true")
@@ -1196,9 +1302,13 @@ def parse_args() -> BridgeConfig:
     parser.add_argument("--local-hover-target-z", type=float, default=2.0)
     parser.add_argument("--local-hover-ramp-seconds", type=float, default=3.0)
     parser.add_argument("--publish-visual-odometry-ros2", action="store_true")
+    parser.add_argument("--publish-debug-truth-ros2", action="store_true")
+    parser.add_argument("--presettle-duration-seconds", type=float, default=PRESETTLE_DURATION_SECONDS)
+    parser.add_argument("--px4-alignment-hold-seconds", type=float, default=PX4_ALIGNMENT_HOLD_SECONDS)
     parser.add_argument("--ready-file", type=Path, default=None)
     parser.add_argument("--connected-file", type=Path, default=None)
     parser.add_argument("--debug-controls", action="store_true")
+    parser.add_argument("--debug-hil-rate", action="store_true")
     args = parser.parse_args()
     model_path = args.model.expanduser()
     if not model_path.is_absolute():
@@ -1213,14 +1323,19 @@ def parse_args() -> BridgeConfig:
         steps=args.steps,
         px4_hover_thrust=args.px4_hover_thrust,
         real_time_factor=args.real_time_factor,
+        physics_substeps_per_sensor=max(args.physics_substeps_per_sensor, 1),
         send_hil_gps=args.send_hil_gps,
         local_hover=args.local_hover,
         local_hover_target_z=args.local_hover_target_z,
         local_hover_ramp_seconds=args.local_hover_ramp_seconds,
         publish_visual_odometry_ros2=args.publish_visual_odometry_ros2,
+        publish_debug_truth_ros2=args.publish_debug_truth_ros2,
+        presettle_duration_seconds=max(args.presettle_duration_seconds, 0.0),
+        px4_alignment_hold_seconds=max(args.px4_alignment_hold_seconds, 0.0),
         ready_file=args.ready_file,
         connected_file=args.connected_file,
         debug_controls=args.debug_controls,
+        debug_hil_rate=args.debug_hil_rate,
     )
 
 

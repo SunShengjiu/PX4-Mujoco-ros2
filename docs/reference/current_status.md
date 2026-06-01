@@ -25,12 +25,14 @@
   - `run_px4.sh`
   - `run_qgc.sh`
   - `run_stack.sh`
-  - `run_stack_ros2.sh`
   - `run_ros2_agent.sh`
-  - `run_offboard_hold.sh`
+  - `run_offboard_control.sh`
 - The repository includes a ROS 2 workspace and package for PX4 Offboard control:
   - `ros2_ws/src/px4_mujoco_ros2_control`
-- `run-stack` and `run-stack-ros2` explicitly start the bridge with `--no-local-hover` so PX4 remains the only flight controller in those paths
+  - `ros2_ws/src/px4_mujoco_ros2_bringup`
+  - `ros2_ws/src/uav_control`
+- PX4 and ROS 2 Offboard runs start the bridge with `--no-local-hover` so PX4 remains the only flight controller in those paths
+- `px4_mujoco_ros2_control` is now a generic Offboard gateway, while hover and waypoint cruise live in `uav_control`
 - The official PX4 patch is stored in:
   - `integrations/px4/patches/release-1.15-mujoco-delta.patch`
 
@@ -47,16 +49,16 @@ These parts have been validated locally:
 - ROS 2 workspace build
 - PX4 ROS 2 message-chain visibility up to topics such as:
   - `/fmu/out/vehicle_status`
-  - `/fmu/out/timesync_status`
   - `/fmu/out/vehicle_local_position`
-  - `/fmu/out/vehicle_odometry`
-- PX4 Offboard requests reaching PX4 through the ROS 2 pipeline, with the hover-fallback and external-command interface implemented in `offboard_control.py`
+- PX4 Offboard requests reaching PX4 through the ROS 2 pipeline
+- `hover_test` and `waypoint_cruise` are available as upper-layer `uav_control` nodes
 
 ## Still Pending
 
 The remaining work is not basic repository structure anymore. It is end-to-end stabilization and verification:
 
-1. stabilize PX4 estimator initialization in `make run-stack-ros2`
+1. stabilize PX4 local-position readiness in the separated ROS 2 Offboard startup flow
 2. confirm stable PX4 arm, takeoff, hover, and hold in MuJoCo through the Offboard path
 3. verify the delta-arm scene and plain UAV scene both behave correctly under the PX4-controlled stack
 4. harden startup cleanup around stale PX4 and Micro XRCE-DDS Agent processes where needed
+5. add richer `uav_control` examples such as circle flight, smoothed trajectories, and replanning

@@ -15,6 +15,7 @@ HAS_HOST_ARG=0
 HAS_PORT_ARG=0
 HAS_ACTUATOR_PORT_ARG=0
 HAS_HOVER_ARG=0
+HAS_PHYSICS_SUBSTEPS_ARG=0
 HAS_LOCAL_HOVER_ARG=0
 HAS_NO_LOCAL_HOVER_ARG=0
 HAS_LOCAL_HOVER_TARGET_Z_ARG=0
@@ -30,6 +31,8 @@ for arg in "$@"; do
     HAS_ACTUATOR_PORT_ARG=1
   elif [[ "${arg}" == "--px4-hover-thrust" ]] || [[ "${arg}" == --px4-hover-thrust=* ]]; then
     HAS_HOVER_ARG=1
+  elif [[ "${arg}" == "--physics-substeps-per-sensor" ]] || [[ "${arg}" == --physics-substeps-per-sensor=* ]]; then
+    HAS_PHYSICS_SUBSTEPS_ARG=1
   elif [[ "${arg}" == "--local-hover" ]]; then
     HAS_LOCAL_HOVER_ARG=1
   elif [[ "${arg}" == "--no-local-hover" ]]; then
@@ -61,6 +64,10 @@ fi
 
 if [[ "${HAS_HOVER_ARG}" -eq 0 ]]; then
   ARGS+=(--px4-hover-thrust "${PX4_MUJOCO_HOVER_THRUST}")
+fi
+
+if [[ "${HAS_PHYSICS_SUBSTEPS_ARG}" -eq 0 ]]; then
+  ARGS+=(--physics-substeps-per-sensor "${PX4_MUJOCO_PHYSICS_SUBSTEPS_PER_SENSOR:-10}")
 fi
 
 if [[ "${HAS_LOCAL_HOVER_ARG}" -eq 0 && "${HAS_NO_LOCAL_HOVER_ARG}" -eq 0 && "${PX4_MUJOCO_LOCAL_HOVER:-0}" == "1" ]]; then

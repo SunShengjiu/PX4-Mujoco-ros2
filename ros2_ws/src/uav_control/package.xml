@@ -1,15 +1,14 @@
 <?xml version="1.0"?>
 <package format="3">
-  <name>px4_mujoco_ros2_control</name>
+  <name>uav_control</name>
   <version>0.1.0</version>
-  <description>Generic ROS 2 to PX4 Offboard gateway for the PX4 MuJoCo simulation stack.</description>
+  <description>Generic UAV control, planning, and test nodes for the PX4 MuJoCo ROS 2 stack.</description>
   <maintainer email="user@example.com">PX4 MuJoCo ROS2 Maintainers</maintainer>
   <license>MIT</license>
 
   <buildtool_depend>ament_python</buildtool_depend>
 
   <exec_depend>rclpy</exec_depend>
-  <exec_depend>px4_msgs</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>nav_msgs</exec_depend>
 

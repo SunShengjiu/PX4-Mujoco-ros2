@@ -36,9 +36,9 @@ if [[ ! -f "${PX4_MUJOCO_ROS2_WS_ABS}/install/setup.bash" ]]; then
   exit 1
 fi
 
-# shellcheck disable=SC1091
 set +u
+# shellcheck disable=SC1091
 source "${PX4_MUJOCO_ROS2_WS_ABS}/install/setup.bash"
 set -u
 
-exec ros2 run px4_mujoco_ros2_control offboard_control "$@"
+exec ros2 run uav_control hover_test "$@"

@@ -28,10 +28,10 @@ This is the control path used by `make run-stack-*`.
 
 ```text
 QGroundControl <- UDP 14550 <- PX4 SITL <- TCP 4560 -> Python bridge <-> MuJoCo
-ROS 2 offboard_control -> px4_msgs -> Micro XRCE-DDS Agent <- UDP 8888 <- PX4 SITL
+uav_control -> ROS 2 cmd_pose/cmd_twist -> offboard_control -> px4_msgs -> Micro XRCE-DDS Agent <- UDP 8888 <- PX4 SITL
 ```
 
-This is the message chain used by `make run-stack-ros2-*`.
+This is the message chain used by the separated ROS 2 startup flow: Agent, bridge, PX4, `offboard_control`, then an upper-layer `uav_control` node.
 
 ## Responsibilities
 
@@ -47,11 +47,13 @@ This is the message chain used by `make run-stack-ros2-*`.
 
 - `scripts/`
   - owns setup, patching, build, validation, and launch orchestration
-  - separates local, PX4, and ROS 2 startup entry points
+  - provides separate local, PX4, Agent, bridge, and ROS 2 node startup entry points
 
 - `ros2_ws/`
-  - stores the ROS 2 Offboard helper package
-  - provides a hover-fallback Offboard controller plus ROS 2 setpoint and command inputs
+  - stores `px4_msgs`, the Offboard gateway package, the separated bringup package, and `uav_control`
+  - keeps PX4-facing gateway code in `px4_mujoco_ros2_control`
+  - keeps launch files in `px4_mujoco_ros2_bringup`
+  - keeps hover, waypoint cruise, and future planning nodes in `uav_control`
 
 - `integrations/px4/`
   - stores the minimal PX4 patch required by this repository
@@ -59,8 +61,10 @@ This is the message chain used by `make run-stack-ros2-*`.
 ## Control Ownership Rules
 
 1. `make run-local` uses the bridge-local hover controller.
-2. `make run-stack*` and `make run-stack-ros2*` disable bridge-local hover with `--no-local-hover`.
+2. PX4 and ROS 2 Offboard runs start the bridge with `--no-local-hover`.
 3. In PX4 paths, PX4 remains the only flight controller in the loop.
+4. `offboard_control` only forwards active external setpoints and does not own mission behavior.
+5. `uav_control` owns mission behavior and publishes generic ROS 2 commands.
 
 ## Why This Shape
 

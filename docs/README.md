@@ -15,6 +15,7 @@ Choose the guide that matches what you want to run:
 
 2. PX4 stack without the manipulator arm
    - command: `make run-stack-uav`
+   - ROS 2 Offboard: start Agent, bridge, PX4, Offboard gateway, and `uav_control` node in separate terminals
    - guide: [docs/scenarios/uav_px4.md](/home/sun/PX4-MuJoCo-ROS2/docs/scenarios/uav_px4.md)
 
 3. PX4 stack with the delta arm scene
