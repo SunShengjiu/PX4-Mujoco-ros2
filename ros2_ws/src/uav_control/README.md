@@ -1,64 +1,76 @@
 # uav_control
 
-Upper-layer UAV control, planning, and test nodes for the PX4 MuJoCo ROS 2 stack.
+这是 PX4 MuJoCo ROS 2 工程里的上层 UAV 控制、规划和测试节点包。
 
-This package should decide where the aircraft should fly. It should not publish directly to PX4 `/fmu/in/*` topics. Instead, it publishes generic commands to the Offboard gateway in `px4_mujoco_ros2_control`.
+这个包负责决定飞机应该飞到哪里。它不应该直接发布 PX4 `/fmu/in/*` 话题，而是应该把通用 ROS 2 命令发布给 `px4_mujoco_ros2_control` 里的 Offboard 网关。
 
-## Interfaces
+## 接口
 
-- command output: `/offboard_control/cmd_pose`, `geometry_msgs/msg/PoseStamped`
-- optional state input: `/offboard_control/odom`, `nav_msgs/msg/Odometry`
-- default frame: `map_ned`
-- height convention: PX4 NED, so flying upward uses negative `z`, for example `z=-1.0`
+- 控制输出：`/offboard_control/cmd_pose`，类型 `geometry_msgs/msg/PoseStamped`
+- 可选状态输入：`/offboard_control/odom`，类型 `nav_msgs/msg/Odometry`
+- 默认坐标系：`map_ned`
+- 高度约定：PX4 使用 NED 坐标，向上是负数，例如 `z=-1.0`
 
-## Nodes
+## 节点
 
 ### hover_test
 
-Publishes one fixed pose continuously. This is only a link test and a simple hover target.
+持续发布一个固定位置。它只是链路测试节点，也可以作为最简单的悬停目标。
 
 ```bash
 ./scripts/run_hover_test.sh --ros-args -p z:=-1.0
 ```
 
-Parameters:
+参数：
 
-- `x`, default `0.0`
-- `y`, default `0.0`
-- `z`, default `-1.0`
-- `yaw`, default `0.0`
-- `rate_hz`, default `20.0`
+- `x`，默认 `0.0`
+- `y`，默认 `0.0`
+- `z`，默认 `-1.0`
+- `yaw`，默认 `0.0`
+- `rate_hz`，默认 `20.0`
 
 ### waypoint_cruise
 
-Cycles through fixed 3D waypoints. It publishes the current target to `/offboard_control/cmd_pose` and watches `/offboard_control/odom` to decide when the target has been reached.
+从 `/offboard_control/odom` 锁定当前 XY 位置，先到目标 NED 高度 `z` 并保持一小段时间，然后发布一圈平滑圆轨迹，最后回到起点并持续发布起点位置，让飞机稳定悬停。
 
 ```bash
 ./scripts/run_waypoint_cruise.sh --ros-args \
-  -p waypoints:="[0.0, 0.0, -1.0, 1.0, 0.0, -1.0, 1.0, 1.0, -1.0, 0.0, 1.0, -1.0]" \
-  -p arrival_radius:=0.25 \
-  -p hold_time_s:=2.0
+  -p z:=-1.0 \
+  -p radius:=0.8 \
+  -p period_s:=24.0 \
+  -p pre_circle_hold_s:=5.0
 ```
 
-Parameters:
+参数：
 
-- `waypoints`, flat list of `x, y, z` triples
-- `yaw`, default `0.0`
-- `rate_hz`, default `20.0`
-- `arrival_radius`, default `0.25`
-- `hold_time_s`, default `2.0`
-- `cmd_pose_topic`, default `/offboard_control/cmd_pose`
-- `odom_topic`, default `/offboard_control/odom`
-- `frame_id`, default `map_ned`
-- `loop`, default `true`
+- `center_x`，默认 `0.0`，仅在 `use_current_position=false` 时使用
+- `center_y`，默认 `0.0`，仅在 `use_current_position=false` 时使用
+- `z`，默认 `-1.0`
+- `radius`，默认 `0.8`
+- `period_s`，默认 `24.0`
+- `pre_circle_hold_s`，默认 `5.0`
+- `hold_time_s`，默认 `999999.0`
+- `yaw`，默认 `0.0`
+- `rate_hz`，默认 `20.0`
+- `cmd_pose_topic`，默认 `/offboard_control/cmd_pose`
+- `odom_topic`，默认 `/offboard_control/odom`
+- `frame_id`，默认 `map_ned`
+- `clockwise`，默认 `false`
+- `use_current_position`，默认 `true`
 
-## Adding New Control Nodes
+## 新增控制节点
 
-Put new mission logic here, for example circle flight, waypoint files, trajectory smoothing, or replanning.
+新的任务逻辑应该放在这里，例如画圈、航点文件、轨迹平滑、重规划等。
 
-The normal pattern is:
+完整步骤请阅读：
 
-1. Subscribe to `/offboard_control/odom` if the node needs vehicle state.
-2. Publish `PoseStamped` to `/offboard_control/cmd_pose` or `TwistStamped` to `/offboard_control/cmd_twist`.
-3. Add a console entry in `setup.py`.
-4. Keep PX4-specific topic names and arming logic out of this package unless the node is explicitly testing a PX4 command path.
+```text
+ros2_ws/src/uav_control/ADDING_FEATURES.md
+```
+
+常规模式是：
+
+1. 如果节点需要飞机状态，订阅 `/offboard_control/odom`。
+2. 发布 `PoseStamped` 到 `/offboard_control/cmd_pose`，或者发布 `TwistStamped` 到 `/offboard_control/cmd_twist`。
+3. 在 `setup.py` 里添加 console entry。
+4. 不要在这个包里写 PX4 专用话题名和解锁逻辑，除非该节点就是为了测试 PX4 命令通道。

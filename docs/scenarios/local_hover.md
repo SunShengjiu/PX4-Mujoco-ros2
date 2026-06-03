@@ -1,31 +1,31 @@
-# Local Visual Hover
+# 本地可视化悬停
 
-## Purpose
+## 目的
 
-Use this path when you want to see the aircraft move in MuJoCo immediately, without waiting for PX4, ROS 2, or QGroundControl.
+当你只想立刻看到 MuJoCo 中的飞机运动，而不想等待 PX4、ROS 2 或 QGroundControl 时，使用这条路径。
 
-## Command
+## 命令
 
 ```bash
 make run-local
 ```
 
-## What Runs
+## 会启动什么
 
 - MuJoCo
 - `bridge.py`
-- the bridge-local takeoff/hover controller
+- bridge 本地起飞/悬停控制器
 
-PX4 is not started in this path.
+这条路径不会启动 PX4。
 
-## Expected Result
+## 预期结果
 
-- the MuJoCo window opens
-- the vehicle rises from the ground
-- the vehicle settles near the configured target height
+- MuJoCo 窗口打开。
+- 飞机从地面升起。
+- 飞机稳定在配置的目标高度附近。
 
-## Notes
+## 注意事项
 
-- this is the fastest visual validation path in the repository
-- this path is useful for confirming the MuJoCo scene and flight actuation behavior
-- this path does not validate the PX4 message chain
+- 这是仓库里最快的可视化验证路径。
+- 适合确认 MuJoCo 场景和飞行动作器是否正常。
+- 这条路径不能验证 PX4 消息链路。

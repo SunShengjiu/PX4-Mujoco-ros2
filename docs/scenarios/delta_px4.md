@@ -1,20 +1,20 @@
-# PX4 Delta Arm Scenario
+# PX4 Delta 机械臂场景
 
-## Purpose
+## 目的
 
-Use this path when you want the integrated scene with the manipulator arm present in MuJoCo.
+当你想使用 MuJoCo 中包含机械臂的集成场景时，使用这条路径。
 
-## Commands
+## 命令
 
-Stack only:
+只运行 PX4 栈：
 
 ```bash
 make run-stack-delta
 ```
 
-PX4 + ROS 2 Offboard path:
+PX4 + ROS 2 Offboard 路径：
 
-Use five terminals. The fifth terminal can be `hover_test`, `waypoint_cruise`, or another upper-layer node from `uav_control`.
+使用五个终端。第五个终端可以启动 `hover_test`、`waypoint_cruise`，或 `uav_control` 中的其他上层节点。
 
 ```bash
 make run-ros2-agent
@@ -40,26 +40,26 @@ PX4_MUJOCO_PX4_AUTOSTART=22002 \
 ./scripts/run_hover_test.sh --ros-args -p z:=-1.0
 ```
 
-For waypoint cruise, use this as terminal 5 instead:
+如果要测试画圈节点，把第五个终端换成：
 
 ```bash
 ./scripts/run_waypoint_cruise.sh
 ```
 
-## Scene and Airframe
+## 场景和 Airframe
 
-- MuJoCo scene: `UAV/scene_uav_delta.xml`
-- PX4 autostart: `22002`
+- MuJoCo 场景：`UAV/scene_uav_delta.xml`
+- PX4 autostart：`22002`
 
-## Control Ownership
+## 控制权
 
-- the bridge is started with `--no-local-hover`
-- PX4 owns the flight control loop
-- `px4_mujoco_ros2_control` remains only the Offboard gateway
-- hover, waypoint cruise, and later mission logic live in `uav_control`
-- the manipulator actuators remain in the model, but current PX4 flight output is still mapped to the four flight motors only
+- bridge 使用 `--no-local-hover` 启动。
+- PX4 负责飞控闭环。
+- `px4_mujoco_ros2_control` 只作为 Offboard 网关。
+- 悬停、画圈和后续任务逻辑都放在 `uav_control`。
+- 机械臂动作器保留在模型中，但当前 PX4 飞行输出仍然只映射到四个飞行电机。
 
-## When To Use It
+## 什么时候使用
 
-- when you want to validate the final integrated visual scene
-- when you want the same scene that the repository currently treats as the default PX4-oriented model
+- 当你想验证最终集成可视化场景时。
+- 当你想使用仓库当前默认的 PX4-oriented 集成模型时。

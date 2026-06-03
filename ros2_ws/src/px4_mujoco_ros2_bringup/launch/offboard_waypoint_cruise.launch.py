@@ -7,20 +7,17 @@ from launch_ros.actions import Node
 def generate_launch_description():
     return LaunchDescription(
         [
-            DeclareLaunchArgument(
-                "waypoints",
-                default_value=(
-                    "[0.0, 0.0, -1.0, "
-                    "1.0, 0.0, -1.0, "
-                    "1.0, 1.0, -1.0, "
-                    "0.0, 1.0, -1.0]"
-                ),
-            ),
+            DeclareLaunchArgument("center_x", default_value="0.0"),
+            DeclareLaunchArgument("center_y", default_value="0.0"),
+            DeclareLaunchArgument("z", default_value="-1.0"),
+            DeclareLaunchArgument("radius", default_value="0.8"),
+            DeclareLaunchArgument("period_s", default_value="24.0"),
+            DeclareLaunchArgument("pre_circle_hold_s", default_value="5.0"),
+            DeclareLaunchArgument("hold_time_s", default_value="999999.0"),
             DeclareLaunchArgument("yaw", default_value="0.0"),
             DeclareLaunchArgument("rate_hz", default_value="20.0"),
-            DeclareLaunchArgument("arrival_radius", default_value="0.25"),
-            DeclareLaunchArgument("hold_time_s", default_value="2.0"),
-            DeclareLaunchArgument("loop", default_value="true"),
+            DeclareLaunchArgument("clockwise", default_value="false"),
+            DeclareLaunchArgument("use_current_position", default_value="true"),
             DeclareLaunchArgument("warmup_setpoints", default_value="20"),
             DeclareLaunchArgument("command_timeout_s", default_value="0.5"),
             DeclareLaunchArgument("auto_request_offboard_and_arm", default_value="true"),
@@ -59,12 +56,17 @@ def generate_launch_description():
                 output="screen",
                 parameters=[
                     {
-                        "waypoints": LaunchConfiguration("waypoints"),
+                        "center_x": LaunchConfiguration("center_x"),
+                        "center_y": LaunchConfiguration("center_y"),
+                        "z": LaunchConfiguration("z"),
+                        "radius": LaunchConfiguration("radius"),
+                        "period_s": LaunchConfiguration("period_s"),
+                        "pre_circle_hold_s": LaunchConfiguration("pre_circle_hold_s"),
+                        "hold_time_s": LaunchConfiguration("hold_time_s"),
                         "yaw": LaunchConfiguration("yaw"),
                         "rate_hz": LaunchConfiguration("rate_hz"),
-                        "arrival_radius": LaunchConfiguration("arrival_radius"),
-                        "hold_time_s": LaunchConfiguration("hold_time_s"),
-                        "loop": LaunchConfiguration("loop"),
+                        "clockwise": LaunchConfiguration("clockwise"),
+                        "use_current_position": LaunchConfiguration("use_current_position"),
                     }
                 ],
             ),

@@ -1,20 +1,20 @@
-# PX4 Plain UAV Scenario
+# PX4 普通无人机场景
 
-## Purpose
+## 目的
 
-Use this path when you want the simpler PX4-controlled scene without the manipulator arm.
+当你想使用不带机械臂的、更简单的 PX4 控制场景时，使用这条路径。
 
-## Commands
+## 命令
 
-Stack only:
+只运行 PX4 栈：
 
 ```bash
 make run-stack-uav
 ```
 
-PX4 + ROS 2 Offboard path:
+PX4 + ROS 2 Offboard 路径：
 
-Use five terminals. The split is Agent, MuJoCo bridge, PX4 SITL, Offboard gateway, then upper-layer control.
+使用五个终端。分工是 Agent、MuJoCo bridge、PX4 SITL、Offboard 网关、上层控制节点。
 
 ```bash
 make run-ros2-agent
@@ -43,38 +43,39 @@ PX4_MUJOCO_HOVER_THRUST=0.343 \
 ./scripts/run_hover_test.sh --ros-args -p z:=-1.0
 ```
 
-For waypoint cruise, use this as the fifth terminal instead:
+如果要测试“画一圈后悬停”，把第五个终端换成：
 
 ```bash
 ./scripts/run_waypoint_cruise.sh
 ```
 
-Custom waypoint example:
+自定义画圈参数示例：
 
 ```bash
 ./scripts/run_waypoint_cruise.sh --ros-args \
-  -p waypoints:="[0.0, 0.0, -1.0, 1.0, 0.0, -1.0, 1.0, 1.0, -1.0, 0.0, 1.0, -1.0]" \
-  -p arrival_radius:=0.25 \
-  -p hold_time_s:=2.0
+  -p z:=-1.0 \
+  -p radius:=0.8 \
+  -p period_s:=24.0 \
+  -p pre_circle_hold_s:=5.0
 ```
 
-The Offboard gateway does not contain hover or planning logic. Upper-layer nodes in `uav_control` decide where to fly.
+Offboard 网关不包含悬停或规划逻辑。上层节点在 `uav_control` 中决定飞机飞到哪里。
 
-## Scene and Airframe
+## 场景和 Airframe
 
-- MuJoCo scene: `UAV/scene.xml`
-- PX4 autostart: `22003`
+- MuJoCo 场景：`UAV/scene.xml`
+- PX4 autostart：`22003`
 
-## Control Ownership
+## 控制权
 
-- the bridge is started with `--no-local-hover`
-- PX4 owns the flight control loop
-- if ROS 2 is used, the `offboard_control` node publishes Offboard setpoints into PX4 rather than controlling MuJoCo directly
-- `offboard_control` waits for fresh upper-layer setpoints and stays idle without them
-- hover and waypoint cruise live in `uav_control`
-- upper-layer nodes can publish `px4_msgs/msg/TrajectorySetpoint` to `~/trajectory_setpoint`, or use the generic ROS 2 topics `~/cmd_pose` and `~/cmd_twist`
+- bridge 使用 `--no-local-hover` 启动。
+- PX4 负责飞控闭环。
+- 如果使用 ROS 2，`offboard_control` 节点把 Offboard setpoint 发布给 PX4，而不是直接控制 MuJoCo。
+- `offboard_control` 等待新鲜上层 setpoint；没有 setpoint 时保持空闲。
+- 悬停和画圈测试都放在 `uav_control`。
+- 上层节点可以发布 `px4_msgs/msg/TrajectorySetpoint` 到 `~/trajectory_setpoint`，也可以使用通用 ROS 2 话题 `~/cmd_pose` 和 `~/cmd_twist`。
 
-## When To Use It
+## 什么时候使用
 
-- when you want a cleaner PX4 validation target before adding the arm scene
-- when you want to compare PX4 behavior against the delta-arm scene with fewer model variables
+- 在加入机械臂场景前，先验证更干净的 PX4 目标。
+- 当你想用更少模型变量对比 PX4 行为和 Delta 机械臂场景时。

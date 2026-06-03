@@ -1,46 +1,46 @@
-# MuJoCo Model Contract
+# MuJoCo 模型约束
 
-For PX4 SITL and MuJoCo to run in a stable closed loop, the MuJoCo model must satisfy a small but explicit contract.
+为了让 PX4 SITL 和 MuJoCo 稳定闭环运行，MuJoCo 模型需要满足一组明确的最小约束。
 
-This contract applies to both repository scenes:
+这份约束适用于仓库中的两个场景：
 
 - `UAV/scene.xml`
 - `UAV/scene_uav_delta.xml`
 
-## Minimum Requirements
+## 最小要求
 
-- a root free joint: `<freejoint />`
-- actuators that the bridge can write to
-- IMU-related sensors that the bridge can read from
+- 根 body 需要有自由关节：`<freejoint />`
+- 模型需要有 bridge 可以写入的 actuators
+- 模型需要有 bridge 可以读取的 IMU 相关 sensors
 
-The bridge currently expects these sensor names:
+bridge 当前期望这些传感器名称：
 
-- required: `body_gyro`
-- required: `body_linacc`
-- optional: `body_mag`
+- 必需：`body_gyro`
+- 必需：`body_linacc`
+- 可选：`body_mag`
 
-## Recommended Model Shape
+## 推荐模型结构
 
-- the root body should represent the flying vehicle
-- IMU sensors should be attached to the main vehicle body
-- flight actuators should be named clearly and independently
-- if the delta manipulator remains in the same model, the flight channels and manipulator channels should stay clearly separated
+- 根 body 应该代表飞行器本体。
+- IMU 传感器应该挂在主飞行器 body 上。
+- 飞行动作器应该命名清楚，并和其他动作器分开。
+- 如果 Delta 机械臂保留在同一个模型里，飞行通道和机械臂通道应该保持清晰分离。
 
-## Current Repository Convention
+## 当前仓库约定
 
-- flight channels are named:
+- 飞行通道命名为：
   - `motor_1`
   - `motor_2`
   - `motor_3`
   - `motor_4`
-- Quad X order is fixed as:
-  - front-left
-  - rear-right
-  - front-right
-  - rear-left
-- `UAV/UAV_Delta.xml` keeps the manipulator actuators in the same file, but PX4 flight output is still mapped only to the four flight motors
+- Quad X 顺序固定为：
+  - 左前
+  - 右后
+  - 右前
+  - 左后
+- `UAV/UAV_Delta.xml` 把机械臂动作器保留在同一个文件里，但 PX4 飞行输出仍然只映射到四个飞行电机。
 
-## Scope Notes
+## 范围说明
 
-- `make run-local` uses the same scene/model assets, but does not depend on PX4.
-- PX4 stack and ROS 2 Offboard startup flows depend on this contract for PX4-facing HIL behavior.
+- `make run-local` 使用同一套场景和模型资源，但不依赖 PX4。
+- PX4 栈和 ROS 2 Offboard 启动流程依赖这份约束来保证 PX4-facing HIL 行为正确。

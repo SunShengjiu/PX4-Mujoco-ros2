@@ -1,6 +1,4 @@
 import math
-from ast import literal_eval
-from dataclasses import dataclass
 from typing import Optional
 
 import rclpy
@@ -10,148 +8,145 @@ from nav_msgs.msg import Odometry
 from rclpy.node import Node
 
 
-DEFAULT_WAYPOINTS = [
-    0.0,
-    0.0,
-    -1.0,
-    1.0,
-    0.0,
-    -1.0,
-    1.0,
-    1.0,
-    -1.0,
-    0.0,
-    1.0,
-    -1.0,
-]
-
-
-@dataclass(frozen=True)
-class Waypoint:
-    x: float
-    y: float
-    z: float
-
-
 class WaypointCruiseNode(Node):
-    """Cycle through fixed NED waypoints using the generic Offboard pose interface."""
+    """Hold near the current position, fly one smooth circle, then hold again."""
 
     def __init__(self) -> None:
         super().__init__("waypoint_cruise")
 
-        self.declare_parameter("waypoints", DEFAULT_WAYPOINTS)
+        self.declare_parameter("center_x", 0.0)
+        self.declare_parameter("center_y", 0.0)
+        self.declare_parameter("z", -1.0)
+        self.declare_parameter("radius", 0.8)
+        self.declare_parameter("period_s", 24.0)
+        self.declare_parameter("pre_circle_hold_s", 5.0)
+        self.declare_parameter("hold_time_s", 999999.0)
         self.declare_parameter("yaw", 0.0)
         self.declare_parameter("rate_hz", 20.0)
-        self.declare_parameter("arrival_radius", 0.25)
-        self.declare_parameter("hold_time_s", 2.0)
         self.declare_parameter("cmd_pose_topic", "/offboard_control/cmd_pose")
         self.declare_parameter("odom_topic", "/offboard_control/odom")
         self.declare_parameter("frame_id", "map_ned")
-        self.declare_parameter("loop", True)
+        self.declare_parameter("clockwise", False)
+        self.declare_parameter("use_current_position", True)
 
-        self.waypoints = self.parse_waypoints(self.get_parameter("waypoints").value)
-        self.yaw = float(self.get_parameter("yaw").value)
-        rate_hz = max(float(self.get_parameter("rate_hz").value), 1.0)
-        self.arrival_radius = max(float(self.get_parameter("arrival_radius").value), 0.01)
+        self.center_x = float(self.get_parameter("center_x").value)
+        self.center_y = float(self.get_parameter("center_y").value)
+        self.z = float(self.get_parameter("z").value)
+        self.radius = max(float(self.get_parameter("radius").value), 0.01)
+        self.period_s = max(float(self.get_parameter("period_s").value), 1.0)
+        self.pre_circle_hold_s = max(float(self.get_parameter("pre_circle_hold_s").value), 0.0)
         self.hold_time_s = max(float(self.get_parameter("hold_time_s").value), 0.0)
+        self.yaw = float(self.get_parameter("yaw").value)
+        self.rate_hz = max(float(self.get_parameter("rate_hz").value), 1.0)
         self.cmd_pose_topic = str(self.get_parameter("cmd_pose_topic").value)
         self.odom_topic = str(self.get_parameter("odom_topic").value)
         self.frame_id = str(self.get_parameter("frame_id").value)
-        self.loop = self.parameter_bool("loop")
+        self.clockwise = self.parameter_bool("clockwise")
+        self.use_current_position = self.parameter_bool("use_current_position")
 
-        self.current_index = 0
-        self.arrival_started_s: float | None = None
-        self.latest_odom: Odometry | None = None
+        self.start_time_s: float | None = None
+        self.circle_start_s: float | None = None
+        self.start_x: float | None = None
+        self.start_y: float | None = None
+        self.completed_circle = False
+        self.logged_hold = False
+        self.waiting_for_odom_logged = False
 
         self.publisher = self.create_publisher(PoseStamped, self.cmd_pose_topic, 10)
         self.create_subscription(Odometry, self.odom_topic, self.on_odom, 10)
-        self.create_timer(1.0 / rate_hz, self.on_timer)
+        self.create_timer(1.0 / self.rate_hz, self.on_timer)
 
+        direction = "clockwise" if self.clockwise else "counter-clockwise"
         self.get_logger().info(
-            "Waypoint cruise ready: "
-            f"count={len(self.waypoints)}, loop={int(self.loop)}, "
-            f"arrival_radius={self.arrival_radius:.2f}, hold_time_s={self.hold_time_s:.2f}, "
+            "Circle cruise ready: "
+            f"z={self.z:.2f}, radius={self.radius:.2f}, "
+            f"pre_circle_hold_s={self.pre_circle_hold_s:.2f}, period_s={self.period_s:.2f}, "
+            f"direction={direction}, use_current_position={int(self.use_current_position)}, "
             f"cmd_pose_topic={self.cmd_pose_topic}, odom_topic={self.odom_topic}"
         )
-        self.log_current_waypoint()
 
-    def parse_waypoints(self, values) -> list[Waypoint]:
-        if isinstance(values, str):
-            try:
-                values = literal_eval(values)
-            except (SyntaxError, ValueError) as exc:
-                raise ValueError(
-                    "waypoints must be a list of numbers or a string like "
-                    "'[0.0, 0.0, -1.0]'"
-                ) from exc
-
-        numbers = [float(value) for value in list(values)]
-        if not numbers or len(numbers) % 3 != 0:
-            raise ValueError("waypoints must contain one or more x,y,z triples")
-
-        return [
-            Waypoint(numbers[index], numbers[index + 1], numbers[index + 2])
-            for index in range(0, len(numbers), 3)
-        ]
+        if not self.use_current_position:
+            self.set_start_from_config()
 
     def on_odom(self, msg: Odometry) -> None:
-        self.latest_odom = msg
+        if self.start_x is not None and self.start_y is not None:
+            return
+
+        if not self.use_current_position:
+            return
+
+        self.start_x = float(msg.pose.pose.position.x)
+        self.start_y = float(msg.pose.pose.position.y)
+        self.set_circle_center_from_start()
+        self.get_logger().info(
+            "Circle start locked from odom: "
+            f"start_x={self.start_x:.2f}, start_y={self.start_y:.2f}, "
+            f"center_x={self.center_x:.2f}, center_y={self.center_y:.2f}, z={self.z:.2f}"
+        )
 
     def on_timer(self) -> None:
-        self.publish_current_waypoint()
-        if self.latest_odom is None:
+        if self.start_x is None or self.start_y is None:
+            if not self.waiting_for_odom_logged:
+                self.get_logger().info("Waiting for odometry before publishing circle setpoints")
+                self.waiting_for_odom_logged = True
             return
 
-        distance = self.distance_to_current_waypoint(self.latest_odom)
         now_s = self.get_clock().now().nanoseconds * 1e-9
+        if self.start_time_s is None:
+            self.start_time_s = now_s
 
-        if distance > self.arrival_radius:
-            self.arrival_started_s = None
+        elapsed_s = now_s - self.start_time_s
+        if elapsed_s < self.pre_circle_hold_s:
+            self.publish_pose(self.start_x, self.start_y, self.z)
             return
 
-        if self.arrival_started_s is None:
-            self.arrival_started_s = now_s
-            self.get_logger().info(
-                f"Arrived near waypoint {self.current_index}: distance={distance:.2f} m"
-            )
+        if self.circle_start_s is None:
+            self.circle_start_s = now_s
+            self.get_logger().info("Starting one circle from the current hold point")
+
+        circle_elapsed_s = now_s - self.circle_start_s
+        if circle_elapsed_s < self.period_s:
+            progress = circle_elapsed_s / self.period_s
+            angle = 2.0 * math.pi * progress
+            if self.clockwise:
+                angle = -angle
+            x = self.center_x + self.radius * math.cos(angle)
+            y = self.center_y + self.radius * math.sin(angle)
+        else:
+            x = self.start_x
+            y = self.start_y
+            if not self.completed_circle:
+                self.completed_circle = True
+                self.get_logger().info(
+                    "Circle complete; holding final point "
+                    f"x={x:.2f}, y={y:.2f}, z={self.z:.2f}"
+                )
+
+        if circle_elapsed_s > self.period_s + self.hold_time_s and not self.logged_hold:
+            self.logged_hold = True
+            self.get_logger().info("Hold time elapsed; continuing to publish final hold point")
+
+        self.publish_pose(x, y, self.z)
+
+    def set_start_from_config(self) -> None:
+        self.start_x = self.center_x + self.radius
+        self.start_y = self.center_y
+
+    def set_circle_center_from_start(self) -> None:
+        if self.start_x is None or self.start_y is None:
             return
+        self.center_x = self.start_x - self.radius
+        self.center_y = self.start_y
 
-        if now_s - self.arrival_started_s >= self.hold_time_s:
-            self.advance_waypoint()
-
-    def publish_current_waypoint(self) -> None:
-        waypoint = self.waypoints[self.current_index]
+    def publish_pose(self, x: float, y: float, z: float) -> None:
         msg = PoseStamped()
         msg.header.stamp = self.get_clock().now().to_msg()
         msg.header.frame_id = self.frame_id
-        msg.pose.position.x = waypoint.x
-        msg.pose.position.y = waypoint.y
-        msg.pose.position.z = waypoint.z
+        msg.pose.position.x = x
+        msg.pose.position.y = y
+        msg.pose.position.z = z
         msg.pose.orientation = self.quaternion_from_yaw(self.yaw)
         self.publisher.publish(msg)
-
-    def distance_to_current_waypoint(self, odom: Odometry) -> float:
-        waypoint = self.waypoints[self.current_index]
-        dx = float(odom.pose.pose.position.x) - waypoint.x
-        dy = float(odom.pose.pose.position.y) - waypoint.y
-        dz = float(odom.pose.pose.position.z) - waypoint.z
-        return math.sqrt(dx * dx + dy * dy + dz * dz)
-
-    def advance_waypoint(self) -> None:
-        if self.current_index == len(self.waypoints) - 1 and not self.loop:
-            self.arrival_started_s = None
-            return
-
-        self.current_index = (self.current_index + 1) % len(self.waypoints)
-        self.arrival_started_s = None
-        self.log_current_waypoint()
-
-    def log_current_waypoint(self) -> None:
-        waypoint = self.waypoints[self.current_index]
-        self.get_logger().info(
-            f"Target waypoint {self.current_index}: "
-            f"x={waypoint.x:.2f}, y={waypoint.y:.2f}, z={waypoint.z:.2f}, yaw={self.yaw:.2f}"
-        )
 
     def parameter_bool(self, name: str) -> bool:
         value = self.get_parameter(name).value
@@ -174,16 +169,7 @@ class WaypointCruiseNode(Node):
 
 def main(args: Optional[list[str]] = None) -> None:
     rclpy.init(args=args)
-    try:
-        node = WaypointCruiseNode()
-    except ValueError as exc:
-        fallback = Node("waypoint_cruise_config_error")
-        fallback.get_logger().error(str(exc))
-        fallback.destroy_node()
-        if rclpy.ok():
-            rclpy.shutdown()
-        return
-
+    node = WaypointCruiseNode()
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:

@@ -1,21 +1,21 @@
-# Current Status
+# 当前状态
 
-## Already Implemented
+## 已实现内容
 
-- `bridge.py` defaults to the repository-local model `UAV/scene_uav_delta.xml`
-- `bridge.py` also includes a bridge-local takeoff/hover mode used by `make run-local`
-- `UAV/UAV.xml` and `UAV/UAV_Delta.xml` include the required HIL sensors:
+- `bridge.py` 默认使用仓库内模型 `UAV/scene_uav_delta.xml`。
+- `bridge.py` 包含 bridge 本地起飞/悬停模式，供 `make run-local` 使用。
+- `UAV/UAV.xml` 和 `UAV/UAV_Delta.xml` 包含 HIL 所需传感器：
   - `body_gyro`
   - `body_linacc`
   - `body_mag`
-- Flight actuators are explicitly named `motor_1..motor_4`
-- Flight motor order is aligned with PX4 Quad X:
-  - front-left
-  - rear-right
-  - front-right
-  - rear-left
-- Delta manipulator actuators remain in the model, but PX4 output is mapped only to the flight motors
-- The repository includes a complete first-release script set:
+- 飞行动作器显式命名为 `motor_1..motor_4`。
+- 飞行电机顺序已经对齐 PX4 Quad X：
+  - 左前
+  - 右后
+  - 右前
+  - 左后
+- Delta 机械臂动作器保留在模型中，但 PX4 输出只映射到四个飞行电机。
+- 仓库包含第一版完整脚本集合：
   - `bootstrap_workspace.sh`
   - `install_ubuntu_deps.sh`
   - `apply_px4_patch.sh`
@@ -27,38 +27,38 @@
   - `run_stack.sh`
   - `run_ros2_agent.sh`
   - `run_offboard_control.sh`
-- The repository includes a ROS 2 workspace and package for PX4 Offboard control:
+- 仓库包含 ROS 2 工作空间和 PX4 Offboard 相关包：
   - `ros2_ws/src/px4_mujoco_ros2_control`
   - `ros2_ws/src/px4_mujoco_ros2_bringup`
   - `ros2_ws/src/uav_control`
-- PX4 and ROS 2 Offboard runs start the bridge with `--no-local-hover` so PX4 remains the only flight controller in those paths
-- `px4_mujoco_ros2_control` is now a generic Offboard gateway, while hover and waypoint cruise live in `uav_control`
-- The official PX4 patch is stored in:
+- PX4 和 ROS 2 Offboard 运行时使用 `--no-local-hover`，确保 PX4 是唯一飞控。
+- `px4_mujoco_ros2_control` 已经整理为通用 Offboard 网关，悬停和画圈测试放在 `uav_control`。
+- 官方 PX4 patch 存放在：
   - `integrations/px4/patches/release-1.15-mujoco-delta.patch`
 
-## Current Validation Level
+## 当前验证水平
 
-These parts have been validated locally:
+以下内容已经在本地验证过：
 
-- shell script syntax
-- Python syntax compilation
-- model contract checks
-- local bridge smoke run with `--no-mavlink`
-- direct local MuJoCo auto takeoff/hover visual path through `make run-local`
-- PX4 patch applicability with `git apply --check`
-- ROS 2 workspace build
-- PX4 ROS 2 message-chain visibility up to topics such as:
+- shell 脚本语法
+- Python 语法编译
+- 模型约束检查
+- bridge 本地 smoke run，使用 `--no-mavlink`
+- `make run-local` 直接运行 MuJoCo 自动起飞/悬停可视化路径
+- PX4 patch 可应用性，使用 `git apply --check`
+- ROS 2 工作空间构建
+- PX4 ROS 2 消息链路可见，例如：
   - `/fmu/out/vehicle_status`
   - `/fmu/out/vehicle_local_position`
-- PX4 Offboard requests reaching PX4 through the ROS 2 pipeline
-- `hover_test` and `waypoint_cruise` are available as upper-layer `uav_control` nodes
+- PX4 Offboard 请求可以通过 ROS 2 链路到达 PX4
+- `hover_test` 和 `waypoint_cruise` 可以作为 `uav_control` 上层节点运行
 
-## Still Pending
+## 后续待做
 
-The remaining work is not basic repository structure anymore. It is end-to-end stabilization and verification:
+剩余工作不再是基础项目结构，而是端到端稳定性和验证：
 
-1. stabilize PX4 local-position readiness in the separated ROS 2 Offboard startup flow
-2. confirm stable PX4 arm, takeoff, hover, and hold in MuJoCo through the Offboard path
-3. verify the delta-arm scene and plain UAV scene both behave correctly under the PX4-controlled stack
-4. harden startup cleanup around stale PX4 and Micro XRCE-DDS Agent processes where needed
-5. add richer `uav_control` examples such as circle flight, smoothed trajectories, and replanning
+1. 稳定分终端 ROS 2 Offboard 启动流程中的 PX4 本地位置 readiness。
+2. 确认 Offboard 路径下 PX4 解锁、起飞、悬停和保持稳定。
+3. 验证 Delta 机械臂场景和普通无人机场景在 PX4 控制下都能稳定运行。
+4. 加强旧 PX4 和 Micro XRCE-DDS Agent 进程清理逻辑。
+5. 增加更丰富的 `uav_control` 示例，例如圆轨迹、平滑轨迹和重规划。
